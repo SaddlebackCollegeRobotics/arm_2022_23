@@ -410,8 +410,8 @@ MonoBehaviour:
   axis: {x: 0, y: 0, z: 1}
   defaultLocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
   useLimits: 1
-  min: 23.5
-  max: 125.4
+  min: 15.474
+  max: 66.658
   zeroAxisDisplayOffset: 0
 --- !u!23 &261179020
 MeshRenderer:
@@ -591,8 +591,8 @@ MonoBehaviour:
   axis: {x: 0, y: 0, z: 1}
   defaultLocalRotation: {x: -0, y: -0, z: -0, w: 1}
   useLimits: 1
-  min: 18.8
-  max: 135.8
+  min: 35.685
+  max: 72.51
   zeroAxisDisplayOffset: 0
 --- !u!23 &708571141
 MeshRenderer:
@@ -686,8 +686,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 728251057}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.26, y: -2.82, z: 0}
-  m_LocalScale: {x: 14.2682, y: 12.916, z: 1}
+  m_LocalPosition: {x: -4.6395, y: -2.82, z: 0}
+  m_LocalScale: {x: 15.027268, y: 14.70745, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 795182851}
@@ -1138,7 +1138,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1713048822}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.68, z: 0}
+  m_LocalPosition: {x: 0, y: 4.73, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
