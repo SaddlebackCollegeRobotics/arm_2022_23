@@ -8,7 +8,7 @@ from roboclaw_3 import Roboclaw
 #Windows comport name
 # rc = Roboclaw("COM3",115200)
 #Linux comport name
-rc = Roboclaw("/dev/ttyACM0",115200)
+rc = Roboclaw("/dev/ttyACM1",115200)
 
 def displayspeed():
 	enc1 = rc.ReadEncM1(address)
@@ -49,7 +49,7 @@ else:
 	print (repr(version[1]))
 
 while(1):
-	rc.SpeedDistanceM1(address,12000,48000,1)
+	# rc.SpeedDistanceM1(address,12000,48000,1)
 	rc.SpeedDistanceM2(address,-12000,48000,1)
 	buffers = (0,0,0)
 	while(buffers[1]!=0x80 and buffers[2]!=0x80):	#Loop until distance command has completed
@@ -58,7 +58,7 @@ while(1):
   
 	time.sleep(2)
 
-	rc.SpeedDistanceM1(address,-12000,48000,1)
+	# rc.SpeedDistanceM1(address,-12000,48000,1)
 	rc.SpeedDistanceM2(address,12000,48000,1)
 	buffers = (0,0,0)
 	while(buffers[1]!=0x80 and buffers[2]!=0x80):	#Loop until distance command has completed
@@ -67,11 +67,11 @@ while(1):
   
 	time.sleep(2);  #When no second command is given the motors will automatically slow down to 0 which takes 1 second
 
-	rc.SpeedDistanceM1(address,12000,48000,1)
+	# rc.SpeedDistanceM1(address,12000,48000,1)
 	rc.SpeedDistanceM2(address,-12000,48000,1)
-	rc.SpeedDistanceM1(address,-12000,48000,0)
+	# rc.SpeedDistanceM1(address,-12000,48000,0)
 	rc.SpeedDistanceM2(address,12000,48000,0)
-	rc.SpeedDistanceM1(address,0,48000,0)
+	# rc.SpeedDistanceM1(address,0,48000,0)
 	rc.SpeedDistanceM2(address,0,48000,0)
 	buffers = (0,0,0)
 	while(buffers[1]!=0x80 and buffers[2]!=0x80):	#Loop until distance command has completed

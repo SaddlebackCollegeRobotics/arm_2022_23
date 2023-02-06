@@ -4,7 +4,7 @@ from roboclaw_3 import Roboclaw
 #Windows comport name
 # rc = Roboclaw("COM11",115200)
 #Linux comport name
-rc = Roboclaw("/dev/ttyACM0",115200)
+rc = Roboclaw("/dev/ttyACM1",115200)
 
 rc.Open()
 
