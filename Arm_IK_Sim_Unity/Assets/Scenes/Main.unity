@@ -1792,7 +1792,7 @@ GameObject:
   - component: {fileID: 817404631}
   - component: {fileID: 817404633}
   m_Layer: 0
-  m_Name: Rotator
+  m_Name: Rotator Joint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2683,6 +2683,7 @@ MonoBehaviour:
   jointList:
   - {fileID: 261179017}
   - {fileID: 708571143}
+  - {fileID: 817404628}
 --- !u!1 &1442405458
 GameObject:
   m_ObjectHideFlags: 0

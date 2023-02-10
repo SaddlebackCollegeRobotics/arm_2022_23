@@ -31,7 +31,7 @@ class MinimalSubscriber(Node):
         # Subscribe to the topic 'topic'. Callback gets called when a message is received.
         self.subscription = self.create_subscription(
             Float32MultiArray,
-            '/chatter',
+            '/Arm_Controls_Sim',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
@@ -39,7 +39,7 @@ class MinimalSubscriber(Node):
 
     # This callback definition simply prints an info message to the console, along with the data it received. 
     def listener_callback(self, msg):
-        print(msg.data[0], " ", msg.data[1])
+        print(msg.data[0], " ", msg.data[1], " ", msg.data[2])
 
 
 def main(args=None):
