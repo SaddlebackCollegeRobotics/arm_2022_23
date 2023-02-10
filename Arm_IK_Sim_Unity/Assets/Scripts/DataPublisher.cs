@@ -19,10 +19,10 @@ public class DataPublisher : MonoBehaviour
         if (ros2Unity.Ok())
         {
             msg = new std_msgs.msg.Float32MultiArray();
-            msg.Data = new float[2];
+            msg.Data = new float[3];
 
             ros2Node = ros2Unity.CreateNode("ROS2UnityListenerNode");
-            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("chatter"); 
+            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/Arm_Controls_Sim"); 
         }
         
     }
@@ -30,14 +30,29 @@ public class DataPublisher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Note: Interior angles for arm joints
 
-        for (int i = 0; i < jointList.Length; i++)
-        {
-            msg.Data[i] = jointList[i].rotation.eulerAngles.z;
-        }
-
+        // Shoulder joint.
+        msg.Data[0] = 360 - jointList[0].localRotation.eulerAngles.z;
+        // Elbow joint.
+        msg.Data[1] = 180 - jointList[1].localRotation.eulerAngles.z;
         
+        // Base rotation.
+        msg.Data[2] = convertAngleRange(jointList[2].localRotation.eulerAngles.y);
+        
+        print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2]);
 
         chatter_pub.Publish(msg);
     }
+
+
+    // Converts angle range from (0 to 360) to (-180 to 180)
+    private float convertAngleRange(float angle)
+    {
+        if (angle > 180)
+            angle -= 360;
+
+        return angle;
+    }
+
 }

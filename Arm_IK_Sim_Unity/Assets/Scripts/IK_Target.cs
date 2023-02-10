@@ -1,21 +1,20 @@
+// Author: Cameron Rosenthal @Supernova1114
+
 using UnityEngine;
 
-public class IK_Target : MonoBehaviour
+
+public class IK_Target : DragableObject
 {
-    [SerializeField] private Camera currentCamera;    // The scene camera.
-    [SerializeField] private Collider2D targetBounds; // Position limiting bounds of the target.
-
-    private Vector3 mousePos;    // Current mouse position.
-    private Vector3 mouseOffset; // Let mouse click anywhere on target.
-
-    private bool isClicked; // Is the target clicked?
-    [SerializeField] private bool moveWithGamepad = false;
-    [SerializeField] private float smoothTime = 0.5f;
-    [SerializeField] private float speedFactor = 1.5f;
+    [SerializeField] private Collider2D targetBounds;      // Position limiting bounds of the target.
+    [SerializeField] private float smoothTime = 0.5f;      // Smooths target movement while using axis control.
+    [SerializeField] private float speedFactor = 1.5f;     // A factor to control target speed while using axis control.
     
-    private float horizontal;
-    private float vertical;
-    private Vector3 currentVelocity = Vector3.zero;
+    private bool moveWithGamepad = false; // Should the target move using gamepad / keyboard axis.
+
+    private float horizontal; // Horizontal controls axis.
+    private float vertical; // Vertical controls axis.
+    private Vector3 currentVelocity = Vector3.zero; // Used in the smoothing calculation.
+
 
     // Start is called before the first frame update
     void Start()
@@ -36,46 +35,18 @@ public class IK_Target : MonoBehaviour
     }
 
 
-    // When target is pressed
-    private void OnMouseDown()
-    {
-        mousePos = GetMouseWorldPos();
-        mouseOffset = transform.position - mousePos;
+    protected override void OnMousePressed(){}
 
-        isClicked = true;
+
+    protected override void WhileMousePressed()
+    {
+        Vector3 mouseWorldPos = GetMouseWorldPos();
+        Vector3 mouseOffset = GetInitialMouseOffset();
+        transform.position = new Vector3(mouseWorldPos.x + mouseOffset.x, mouseWorldPos.y + mouseOffset.y, transform.position.z);
     }
 
 
-    // While target is pressed.
-    private void OnMouseDrag()
-    {
-        if (isClicked)
-        {
-            mousePos = GetMouseWorldPos();
-            transform.position = new Vector3(mousePos.x + mouseOffset.x, mousePos.y + mouseOffset.y, transform.position.z);
-        }
-    }
-
-
-    // When target is unpressed.
-    private void OnMouseUp()
-    {
-        isClicked = false;
-    }
-
-
-    // Get the mouse position in world space.
-    private Vector3 GetMouseWorldPos()
-    {
-        return currentCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, GetObjectScreenPosZ()));
-    }
-
-    
-    // Get the z screen distance from object to camera.
-    private float GetObjectScreenPosZ()
-    {
-        return currentCamera.WorldToScreenPoint(transform.position).z;
-    }
+    protected override void OnMouseReleased(){}
 
 
     // Limit where the target can move.
@@ -105,6 +76,7 @@ public class IK_Target : MonoBehaviour
     }
 
 
+    // Move the target using gamepad / keyboard axis.
     private void MoveUsingAxis()
     {
         horizontal = Input.GetAxis("Horizontal");
@@ -113,10 +85,9 @@ public class IK_Target : MonoBehaviour
         transform.position = Vector3.SmoothDamp(transform.position, transform.position + new Vector3(horizontal, vertical, 0) * speedFactor, ref currentVelocity, smoothTime);
     }
 
-
-    public void EnableGamepad(bool m)
+    public void SetMoveWithGamepad(bool b)
     {
-        moveWithGamepad = m;
+        moveWithGamepad = b;
     }
 
 }
