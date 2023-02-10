@@ -13,6 +13,7 @@ running build_py
 creating /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build
 creating /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib
 creating /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub
+copying py_pubsub/arm_controller.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub
 copying py_pubsub/publisher_member_function.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub
 copying py_pubsub/roboclaw_3.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub
 copying py_pubsub/subscriber_member_function.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub
@@ -22,10 +23,12 @@ running install
   warnings.warn(
 running install_lib
 creating /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
+copying /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub/arm_controller.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
 copying /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub/publisher_member_function.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
 copying /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub/roboclaw_3.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
 copying /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub/subscriber_member_function.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
 copying /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub/__init__.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
+byte-compiling /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub/arm_controller.py to arm_controller.cpython-310.pyc
 byte-compiling /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub/publisher_member_function.py to publisher_member_function.cpython-310.pyc
 byte-compiling /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub/roboclaw_3.py to roboclaw_3.cpython-310.pyc
 byte-compiling /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub/subscriber_member_function.py to subscriber_member_function.cpython-310.pyc

@@ -41,9 +41,9 @@ class Motor_Controller:
 
     def print_encoders(self):
         enc1 = self.rc.ReadEncM1(self.address)
-        print(f"M1: {enc[1]}" if enc[0] == 1 else "disconnected")
+        print(f"M1: {enc1[1]}" if enc1[0] == 1 else "disconnected")
         enc2 = self.rc.ReadEncM2(self.address)
-        print(f"M2: {enc[1]}" if enc[0] == 1 else "disconnected")
+        print(f"M2: {enc2[1]}" if enc2[0] == 1 else "disconnected")
 
 
 

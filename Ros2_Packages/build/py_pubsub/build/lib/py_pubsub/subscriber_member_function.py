@@ -18,7 +18,7 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 
 # General imports
-# from roboclaw_3 import Roboclaw
+import arm_controller
 
 
 class MinimalSubscriber(Node):
@@ -39,7 +39,9 @@ class MinimalSubscriber(Node):
 
     # This callback definition simply prints an info message to the console, along with the data it received. 
     def listener_callback(self, msg):
-        print(msg.data[0], " ", msg.data[1], " ", msg.data[2])
+        # print(msg.data[0], " ", msg.data[1], " ", msg.data[2])
+        arm_controller.set_arm_position(msg.data[0], msg.data[1], msg.data[2])
+        
 
 
 def main(args=None):

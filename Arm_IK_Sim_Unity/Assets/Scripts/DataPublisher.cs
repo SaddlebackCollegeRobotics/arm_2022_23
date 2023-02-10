@@ -31,13 +31,24 @@ public class DataPublisher : MonoBehaviour
     void Update()
     {
         // Shoulder joint.
-        msg.Data[0] = jointList[0].localRotation.eulerAngles.z;
+        msg.Data[0] = convertAngleRange(jointList[0].localRotation.eulerAngles.z);
         // Elbow joint.
-        msg.Data[1] = jointList[1].localRotation.eulerAngles.z;
+        msg.Data[1] = convertAngleRange(jointList[1].localRotation.eulerAngles.z);
         // Base rotation.
-        msg.Data[2] = jointList[2].localRotation.eulerAngles.y;
+        msg.Data[2] = convertAngleRange(jointList[2].localRotation.eulerAngles.y);
         
 
         chatter_pub.Publish(msg);
     }
+
+
+    // Converts angle range from (0 to 360) to (-180 to 180)
+    private float convertAngleRange(float angle)
+    {
+        if (angle > 180)
+            angle -= 360;
+
+        return angle;
+    }
+
 }
