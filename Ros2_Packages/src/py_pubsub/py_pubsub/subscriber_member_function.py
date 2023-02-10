@@ -18,7 +18,8 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 
 # General imports
-import arm_controller
+import time
+from . import arm_controller
 
 
 class MinimalSubscriber(Node):
@@ -35,7 +36,6 @@ class MinimalSubscriber(Node):
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
-
 
     # This callback definition simply prints an info message to the console, along with the data it received. 
     def listener_callback(self, msg):

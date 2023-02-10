@@ -4,15 +4,15 @@ import time
 # PATH_TO_ROBOCLAW = "../../lib/roboclaw_python"
 # sys.path.append(PATH_TO_ROBOCLAW)
 
-from roboclaw_3 import Roboclaw
+from .roboclaw_3 import Roboclaw
 
 # Windows comport name - "COM8"
 # Linux comport name - "/dev/ttyACM1"
 # OSX comport name - "/dev/tty.usbmodem1301"
 COMPORT_NAME = "/dev/ttyACM0"
 
-SPEED = 600
-ACCELERATION = 200
+SPEED = 850 #600
+ACCELERATION = 700 #200
 
 
 
@@ -26,10 +26,6 @@ class Encoder:
 
     # Convert angle to encoder value taking into account min/max encoder values and angle values.
     def angle_to_enc(self, angle : float):
-
-        if angle > self.angle_retract: angle = self.angle_retract
-        if angle < self.angle_extend: angle = self.angle_extend
-
         slope = (self.encoder_extend - self.encoder_retract) / (self.angle_extend - self.angle_retract)
         
         return int(slope * (angle - self.angle_retract) + self.encoder_retract)
@@ -58,31 +54,34 @@ class Motor_Controller:
 # Set position of arm using PID function.
 def set_arm_position(shoulderJointAngle : float, elbowJointAngle : float, baseRotationAngle):
     
-    # encoder_val_m1 = mcp.m1.angle_to_enc()
-    # encoder_val_m2 = mcp.m2.angle_to_enc()
+    encoder_val_m1 = mcp.m1.angle_to_enc(elbowJointAngle)
+    encoder_val_m2 = mcp.m2.angle_to_enc(shoulderJointAngle)
 
-    # mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
-    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m2, 
-    #     0  # 0 for buffer, 1 for instant write
-    # )
+    mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
+        ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
+        ACCELERATION, SPEED, ACCELERATION, encoder_val_m2, 
+        1  # 0 for buffer, 1 for instant write
+    )
 
     print(shoulderJointAngle, " ", elbowJointAngle, " ", baseRotationAngle)
 
 # Create instance of a motor controller.
-# mcp = Motor_Controller(
-#         rc = Roboclaw(COMPORT_NAME, 115200),
-#         address = 0x80,  
-#         m1 = Encoder(  # elbow joint
-#             encoder_extend = 20,
-#             encoder_retract = 1960,
-#             angle_extend = 90 - 72.51,  # 17.49
-#             angle_retract = 90 - 35.68  # 53.32
-#         ),
-#         m2 = Encoder(  # shoulder joint
-#             encoder_extend = 2337,
-#             encoder_retract = 288,
-#             angle_extend = 90 - 66.65,  # 23.35
-#             angle_retract = 90 - 15.47  # 74.53
-#         )
-#     )
+mcp = Motor_Controller(
+        rc = Roboclaw(COMPORT_NAME, 115200),
+        address = 0x80,  
+        m1 = Encoder(  # elbow joint
+            encoder_extend = 20, #20
+            encoder_retract = 1930, # 1930
+
+            angle_extend = 75,
+            angle_retract = 140
+        ),
+        m2 = Encoder(  # shoulder joint
+            encoder_extend = 30, #30
+            encoder_retract = 2640, #2640
+            
+            angle_extend = 5,
+            angle_retract = 75
+        )
+    )
+# rm -rf build install log && colcon build && source ./install/setup.bash && ros2 run py_pubsub listener

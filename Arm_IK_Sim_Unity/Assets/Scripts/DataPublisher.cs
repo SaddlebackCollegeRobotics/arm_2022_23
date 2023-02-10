@@ -30,13 +30,17 @@ public class DataPublisher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Note: Interior angles for arm joints
+
         // Shoulder joint.
-        msg.Data[0] = convertAngleRange(jointList[0].localRotation.eulerAngles.z);
+        msg.Data[0] = 360 - jointList[0].localRotation.eulerAngles.z;
         // Elbow joint.
-        msg.Data[1] = convertAngleRange(jointList[1].localRotation.eulerAngles.z);
+        msg.Data[1] = 180 - jointList[1].localRotation.eulerAngles.z;
+        
         // Base rotation.
         msg.Data[2] = convertAngleRange(jointList[2].localRotation.eulerAngles.y);
         
+        print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2]);
 
         chatter_pub.Publish(msg);
     }

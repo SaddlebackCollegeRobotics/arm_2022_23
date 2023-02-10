@@ -10,6 +10,8 @@
   <!-- Dependencies for node import statements -->
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>arm_controller</exec_depend>
+  <exec_depend>roboclaw_3</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
