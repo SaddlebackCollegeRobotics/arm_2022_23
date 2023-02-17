@@ -20,11 +20,40 @@ from std_msgs.msg import Float32MultiArray
 # General imports
 import time
 from . import arm_controller
-
+from arm_controller import *
 
 class MinimalSubscriber(Node):
 
     def __init__(self):
+        # Create instance of a motor controller.
+        self.mcp1 = Motor_Controller(
+            rc = Roboclaw(COMPORT_NAME, 115200),
+            address = 0x80,  
+            m1 = Encoder(  # elbow joint
+                encoder_extend = 20, #20
+                encoder_retract = 1930, # 1930
+
+                angle_extend = 75,
+                angle_retract = 140,
+
+                length_extend = 13.47,  # inches
+                length_retract = 10.03927072,  # inches
+
+                actuator_pos = LINEAR_ACTUATOR_POS(3.0, 1.125, 12.50719421)
+            ),
+            m2 = Encoder(  # shoulder joint
+                encoder_extend = 30, #30
+                encoder_retract = 2640, #2640
+                
+                angle_extend = 5,
+                angle_retract = 75,
+
+                length_extend = 13.47,  # inches
+                length_retract = 9.53,  # inches
+
+                actuator_pos = LINEAR_ACTUATOR_POS(7.16717277, 1.0, 6.5)
+            )
+        )
 
         # Give the node a name.
         super().__init__('minimal_subscriber')
@@ -40,7 +69,7 @@ class MinimalSubscriber(Node):
     # This callback definition simply prints an info message to the console, along with the data it received. 
     def listener_callback(self, msg):
         # print(msg.data[0], " ", msg.data[1], " ", msg.data[2])
-        arm_controller.set_arm_position(msg.data[0], msg.data[1], msg.data[2])
+        arm_controller.set_arm_position(self.mcp1, msg.data[0], msg.data[1], msg.data[2])
         
 
 
