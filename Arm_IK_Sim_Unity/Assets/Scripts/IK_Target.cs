@@ -82,12 +82,17 @@ public class IK_Target : DragableObject
         horizontal = Input.GetAxis("Horizontal");
         vertical = Input.GetAxis("Vertical");
         
-        transform.position = Vector3.SmoothDamp(transform.position, transform.position + new Vector3(horizontal, vertical, 0) * speedFactor, ref currentVelocity, smoothTime);
+        transform.position = Vector3.SmoothDamp(transform.position, transform.position + new Vector3(horizontal, vertical, 0) * speedFactor * Time.deltaTime, ref currentVelocity, smoothTime);
     }
 
     public void SetMoveWithGamepad(bool b)
     {
         moveWithGamepad = b;
+    }
+
+    public void SetSpeedFactor(float speed)
+    {
+        speedFactor = speed;
     }
 
 }

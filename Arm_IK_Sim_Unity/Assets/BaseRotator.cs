@@ -54,7 +54,7 @@ public class BaseRotator : DragableObject
         if (hatHorizontal != 0)
         {
             currentJoystickValue = Vector3.SmoothDamp(currentJoystickValue, new Vector3(hatHorizontal, 0, 0), ref currentVelocity, smoothTime);
-            currentRotation = transform.rotation.eulerAngles.y + (-currentJoystickValue.x * speedFactor);
+            currentRotation = transform.rotation.eulerAngles.y + (-currentJoystickValue.x * speedFactor * Time.deltaTime);
         }
     }
 
@@ -88,6 +88,11 @@ public class BaseRotator : DragableObject
             angle -= 360;
 
         return angle;
+    }
+
+    public void SetSpeedFactor(float speed)
+    {
+        speedFactor = speed;
     }
 
 }

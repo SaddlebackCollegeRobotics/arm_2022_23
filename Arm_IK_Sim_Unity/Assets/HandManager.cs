@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class HandManager : MonoBehaviour
 {
@@ -13,33 +9,28 @@ public class HandManager : MonoBehaviour
 
     [Header("Pitch")]
     [SerializeField] private float pitchSpeedFactor = 20;
-    private bool enablePitch = true;
     private int pitchDir = 0;
 
     [Header("Roll")]
     [SerializeField] private float rollSpeedFactor = 20;
-    private bool enableRoll = true;
     private int rollDir = 0;
 
+    [Header("Fingers")]
+    [SerializeField] private float fingerSpeedFactor = 30;
+    private float fingerDir = 0;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
     {
-        if (enablePitch)
-        {
-            handIKSolver.SetDesiredRotation(handIKSolver.GetDesiredRotation() + (pitchDir * pitchSpeedFactor * Time.deltaTime));
-        }
+        // Update desired rotation for pitch IK solver
+        handIKSolver.SetDesiredRotation(handIKSolver.GetDesiredRotation() + (pitchDir * pitchSpeedFactor * Time.deltaTime));
 
-        if (enableRoll)
-        {
-            rollJoint.localRotation = Quaternion.Euler(rollJoint.localEulerAngles.x + (rollDir * rollSpeedFactor * Time.deltaTime), 0, 0);
-        }
+        // Update roll
+        rollJoint.localRotation = Quaternion.Euler(rollJoint.localEulerAngles.x + (rollDir * rollSpeedFactor * Time.deltaTime), 0, 0);
+
+        // Update finger movement direction.
+        DataPublisher.instance.dataArray[0] = fingerDir * fingerSpeedFactor;
     }
 
     // Change pitch of hand (-1, 0, 1)
@@ -48,14 +39,37 @@ public class HandManager : MonoBehaviour
         pitchDir = direction;
     }
 
+    // Change roll of hand (-1, 0, 1)
     public void ChangeRoll(int direction)
     {
         rollDir = direction;
     }
 
+    // Open and close fingers on hand (-1, 0, 1)
+    public void ChangeFingerDir(int direction)
+    {
+        fingerDir = direction;
+    }
+
+    // Enable IK on pitch of hand
     public void EnableIKPitchSolver(bool b)
     {
         handIKSolver.EnableSolver(b);
+    }
+
+    public void SetPitchSpeed(float speed)
+    {
+        pitchSpeedFactor = speed;
+    }
+
+    public void SetRollSpeed(float speed)
+    {
+        rollSpeedFactor = speed;
+    }
+
+    public void SetGrabSpeed(float speed)
+    {
+        fingerSpeedFactor = speed;
     }
 
 }
