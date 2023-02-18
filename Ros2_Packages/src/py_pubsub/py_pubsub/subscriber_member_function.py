@@ -25,35 +25,36 @@ from arm_controller import *
 class MinimalSubscriber(Node):
 
     def __init__(self):
-        # Create instance of a motor controller.
-        self.mcp1 = Motor_Controller(
+         # motor controller with forearm and bicep linear
+        mcp1 = Motor_Controller(
             rc = Roboclaw(COMPORT_NAME, 115200),
             address = 0x80,  
-            m1 = Encoder(  # elbow joint
-                encoder_extend = 20, #20
-                encoder_retract = 1930, # 1930
-
-                angle_extend = 75,
-                angle_retract = 140,
-
-                length_extend = 13.47,  # inches
-                length_retract = 10.03927072,  # inches
-
-                actuator_pos = LINEAR_ACTUATOR_POS(3.0, 1.125, 12.50719421)
+            m1 = Linear_Actuator(  # elbow joint
+                ENCODER_MAX = 20,           # extended
+                ENCODER_MIN = 1930,         # retract
+                ANGLE_MAX   = 75,           # extend
+                ANGLE_MIN   = 140,          # retract
+                LENGTH_MAX  = 13.47,        # extend, inches
+                LENGTH_MIN  = 10.03927072,  # retract, inches
+                POSITION_ON_ARM = actuator_pos(3.0, 1.125, 12.50719421)  # inches
             ),
-            m2 = Encoder(  # shoulder joint
-                encoder_extend = 30, #30
-                encoder_retract = 2640, #2640
-                
-                angle_extend = 5,
-                angle_retract = 75,
-
-                length_extend = 13.47,  # inches
-                length_retract = 9.53,  # inches
-
-                actuator_pos = LINEAR_ACTUATOR_POS(7.16717277, 1.0, 6.5)
+            m2 = Linear_Actuator(  # shoulder joint
+                ENCODER_MAX = 30,       # extended
+                ENCODER_MIN = 2640,     # retract
+                ANGLE_MAX   = 5,        # extend
+                ANGLE_MIN   = 75,       # retract
+                LENGTH_MAX  = 13.47,    # extend, inches
+                LENGTH_MIN  = 9.53,     # retract, inches
+                POSITION_ON_ARM = actuator_pos(7.16717277, 1.0, 6.5)  # inches
             )
         )
+
+        mcp2 = Motor_Controller(...)
+        mcp3 = Motor_Controller(...)
+
+        # remember previous positions
+        self.shoulder_angle, self.elbow_angle, self.base_angle = (-1,-1,-1)
+        self.pitch_angle, self.roll_angle = (-1, -1)
 
         # Give the node a name.
         super().__init__('minimal_subscriber')
@@ -66,10 +67,29 @@ class MinimalSubscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-    # This callback definition simply prints an info message to the console, along with the data it received. 
+    # called every time the subscriber receives a message
     def listener_callback(self, msg):
-        # print(msg.data[0], " ", msg.data[1], " ", msg.data[2])
-        arm_controller.set_arm_position(self.mcp1, msg.data[0], msg.data[1], msg.data[2])
+        shoulder_angle, elbow_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
+        pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
+        
+        # only change the arm position if any angles have changed
+        if (shoulder_angle != self.shoulder_angle or elbow_angle != self.elbow_angle):
+            arm_controller.set_arm_position(self.mcp1, shoulder_angle, elbow_angle)
+            self.shoulder_angle, self.elbow_angle = shoulder_angle, elbow_angle
+
+        if (base_angle != self.base_angle):
+            arm_controller.set_arm_rotation(self.mcp3, base_angle)
+            self.base_angle = base_angle
+
+        if (pitch_angle != self.pitch_angle or roll_angle != self.roll_angle):
+            arm_controller.set_hand_rotation(self.mcp2, pitch_angle, roll_angle)
+            self.pitch_angle, self.roll_angle = pitch_angle, roll_angle
+
+        arm_controller.set_arm_position(self.mcp3, finger_velocity)
+
+        # This prints an info message to the console, along with the data it received. 
+        for x in msg.data: print(x, end=' ')
+        print()
         
 
 
