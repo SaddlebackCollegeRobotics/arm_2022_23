@@ -74,15 +74,15 @@ class MinimalSubscriber(Node):
         
         # only change the arm position if any angles have changed
         if (shoulder_angle != self.shoulder_angle or elbow_angle != self.elbow_angle):
-            arm_controller.set_arm_position(self.mcp1, shoulder_angle, elbow_angle)
+            #arm_controller.set_arm_position(self.mcp1, shoulder_angle, elbow_angle)
             self.shoulder_angle, self.elbow_angle = shoulder_angle, elbow_angle
 
         if (base_angle != self.base_angle):
-            arm_controller.set_arm_rotation(self.mcp3, base_angle)
+            #arm_controller.set_arm_rotation(self.mcp3, base_angle)
             self.base_angle = base_angle
 
         if (pitch_angle != self.pitch_angle or roll_angle != self.roll_angle):
-            arm_controller.set_hand_rotation(self.mcp2, pitch_angle, roll_angle)
+            #arm_controller.set_hand_rotation(self.mcp2, pitch_angle, roll_angle)
             self.pitch_angle, self.roll_angle = pitch_angle, roll_angle
 
         arm_controller.set_arm_position(self.mcp3, finger_velocity)
