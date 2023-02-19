@@ -58,7 +58,7 @@ public class DataPublisher : MonoBehaviour
         msg.Data[4] = convertAngleRange(jointList[4].localEulerAngles.x);
 
         // Hand Fingers Open/Close
-        //msg.Data[5] = dataArray[0];
+        msg.Data[5] = dataArray[0];
 
         //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
 
