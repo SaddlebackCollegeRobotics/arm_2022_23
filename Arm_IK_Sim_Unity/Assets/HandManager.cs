@@ -17,20 +17,22 @@ public class HandManager : MonoBehaviour
 
     [Header("Fingers")]
     [SerializeField] private float fingerSpeedFactor = 30;
-    private float fingerDir = 0;
+    private int fingerDir = 0;
 
 
     // Update is called once per frame
     void Update()
     {
         // Update desired rotation for pitch IK solver
-        handIKSolver.SetDesiredRotation(handIKSolver.GetDesiredRotation() + (pitchDir * pitchSpeedFactor * Time.deltaTime));
+        if (pitchDir != 0)
+            handIKSolver.ChangePitch(-pitchDir * pitchSpeedFactor * Time.deltaTime);
 
         // Update roll
         rollJoint.localRotation = Quaternion.Euler(rollJoint.localEulerAngles.x + (rollDir * rollSpeedFactor * Time.deltaTime), 0, 0);
 
         // Update finger movement direction.
-        DataPublisher.instance.dataArray[0] = fingerDir * fingerSpeedFactor;
+        if (DataPublisher.instance)
+            DataPublisher.instance.dataArray[0] = fingerDir * fingerSpeedFactor;
     }
 
     // Change pitch of hand (-1, 0, 1)

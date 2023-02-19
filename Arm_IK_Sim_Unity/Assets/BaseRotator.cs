@@ -8,7 +8,6 @@ public class BaseRotator : DragableObject
     [SerializeField] private float smoothTime = 0.2f;
     private RootMotion.FinalIK.RotationLimitHinge limitHinge;
     private float initialRotation; // Initial rotation of the object when first pressed.
-    private float horizontal;
     private Vector3 currentVelocity = Vector3.zero;
     private Vector3 currentJoystickValue = Vector3.zero;
     private bool moveWithGamepad = false;
@@ -51,11 +50,8 @@ public class BaseRotator : DragableObject
     {
         hatHorizontal = Input.GetAxis("HatHorizontal");
 
-        if (hatHorizontal != 0)
-        {
-            currentJoystickValue = Vector3.SmoothDamp(currentJoystickValue, new Vector3(hatHorizontal, 0, 0), ref currentVelocity, smoothTime);
-            currentRotation = transform.rotation.eulerAngles.y + (-currentJoystickValue.x * speedFactor * Time.deltaTime);
-        }
+        currentJoystickValue = Vector3.SmoothDamp(currentJoystickValue, new Vector3(hatHorizontal, 0, 0), ref currentVelocity, smoothTime);
+        currentRotation = transform.rotation.eulerAngles.y + (-currentJoystickValue.x * speedFactor * Time.deltaTime);
     }
 
 

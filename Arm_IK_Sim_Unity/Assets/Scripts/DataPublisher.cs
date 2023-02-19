@@ -13,13 +13,17 @@ public class DataPublisher : MonoBehaviour
     [SerializeField] private Transform[] jointList; // Arm joints
     private std_msgs.msg.Float32MultiArray msg;
 
-    public float[] dataArray = new float[] {0}; // Extra data to be published.
+    public float[] dataArray = new float[1]; // Extra data to be published.
+
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        instance = this;
-
         // Init Ros2 stuff
         ros2Unity = transform.parent.GetComponent<ROS2UnityComponent>();
 
@@ -54,7 +58,7 @@ public class DataPublisher : MonoBehaviour
         msg.Data[4] = convertAngleRange(jointList[4].localEulerAngles.x);
 
         // Hand Fingers Open/Close
-        msg.Data[5] = dataArray[0];
+        //msg.Data[5] = dataArray[0];
 
         //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
 
@@ -69,6 +73,11 @@ public class DataPublisher : MonoBehaviour
             angle -= 360;
 
         return angle;
+    }
+
+    public void SetDataArray(float val, int index)
+    {
+        //dataArray[index] = val;
     }
 
 }
