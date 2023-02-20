@@ -25,31 +25,33 @@ from arm_controller import *
 class MinimalSubscriber(Node):
 
     def __init__(self):
-         # motor controller with forearm and bicep linear
-        mcp1 = Motor_Controller(
+        
+        mcp1 = Motor_Controller(...)
+
+        # motor controller with forearm and bicep linear
+        mcp2 = Motor_Controller(
             rc = Roboclaw(COMPORT_NAME, 115200),
             address = 0x80,  
-            m1 = Linear_Actuator(  # elbow joint
-                encoder_max = 20,           # extended
-                encoder_min = 1930,         # retract
-                angle_max   = 75,           # extend
-                angle_min   = 140,          # retract
-                length_max  = 13.47,        # extend, inches
-                length_min  = 10.03927072,  # retract, inches
-                position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
-            ),
-            m2 = Linear_Actuator(  # shoulder joint
-                encoder_max = 30,       # extended
-                encoder_min = 2640,     # retract
-                angle_max   = 5,        # extend
-                angle_min   = 75,       # retract
-                length_max  = 13.47,    # extend, inches
-                length_min  = 9.53,     # retract, inches
+            m1 = Linear_Actuator(  # bicep 
+                encoder_max = 2633,      # retract
+                encoder_min = 25,        # extend
+                angle_max   = 75,        # retract
+                angle_min   = 5,         # extend
+                length_max  = 9.53,      # retract, inches
+                length_min  = 13.47,     # extend, inches
                 position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
+            ),
+            m2 = Linear_Actuator(  # forearm
+                encoder_max = 1893,         # retract
+                encoder_min = 20,           # extend
+                angle_max   = 140,          # retract
+                angle_min   = 75,           # extend
+                length_max  = 10.03927072,  # retract, inches
+                length_min  = 13.47,        # extend, inches
+                position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
             )
         )
 
-        mcp2 = Motor_Controller(...)
         mcp3 = Motor_Controller(...)
 
         # remember previous positions

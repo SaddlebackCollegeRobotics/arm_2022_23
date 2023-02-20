@@ -88,12 +88,12 @@ def length_to_enc(motor : Linear_Actuator, length : float) -> int:
 
 
 # Set position of arm using PID function.
-def set_arm_position(mcp: Motor_Controller, shoulder_angle: float, elbow_angle: float) -> None:
+def set_arm_position(mcp: Motor_Controller, bicep_angle: float, forearm_angle: float) -> None:
     
-    encoder_val_m1 = mcp.m1.angle_to_enc(elbow_angle)
-    #encoder_val_m1 = mcp.m1.length_to_enc( mcp.m1.angle_to_length(elbow_angle))
-    encoder_val_m2 = mcp.m2.angle_to_enc(shoulder_angle)
-    #encoder_val_m2 = mcp.m2.length_to_enc( mcp.m2.angle_to_length(shoulder_angle))
+    encoder_val_m1 = mcp.m1.angle_to_enc(bicep_angle)
+    #encoder_val_m1 = mcp.m1.length_to_enc( mcp.m1.angle_to_length(bicep_angle))
+    encoder_val_m2 = mcp.m2.angle_to_enc(forearm_angle)
+    #encoder_val_m2 = mcp.m2.length_to_enc( mcp.m2.angle_to_length(forearm_angle))
 
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
         ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
@@ -137,32 +137,8 @@ def open_close_hand(mcp: Motor_Controller, move_velocity):
 
 #NOTE for testing of angle_to_length function
 def main():
-    # motor controller with forearm and bicep linear
+    # motor controller with hand pitch and roll 
     mcp1 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME, 115200),
-        address = 0x80,  
-        m1 = Linear_Actuator(  # elbow joint
-            encoder_max = 20,           # extended
-            encoder_min = 1930,         # retract
-            angle_max   = 75,           # extend
-            angle_min   = 140,          # retract
-            length_max  = 13.47,        # extend, inches
-            length_min  = 10.03927072,  # retract, inches
-            position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
-        ),
-        m2 = Linear_Actuator(  # shoulder joint
-            encoder_max = 30,       # extended
-            encoder_min = 2640,     # retract
-            angle_max   = 5,        # extend
-            angle_min   = 75,       # retract
-            length_max  = 13.47,    # extend, inches
-            length_min  = 9.53,     # retract, inches
-            position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
-        )
-    )
-
-    # motor controller with arm rotation and hand grip
-    mcp2 = Motor_Controller(
         rc = Roboclaw(COMPORT_NAME, 115200),  #TODO figure out correct comport
         address = 0x0,  #TODO set val
         m1 = Rotation_Motor(  # pitch motor
@@ -176,6 +152,30 @@ def main():
             encoder_min = 0,  #TODO set value
             angle_min = -90,  
             angle_max = 90 
+        )
+    )
+
+    # motor controller with forearm and bicep linear
+    mcp2 = Motor_Controller(
+        rc = Roboclaw(COMPORT_NAME, 115200),
+        address = 0x80,  
+        m1 = Linear_Actuator(  # bicep 
+            encoder_max = 30,       # extended
+            encoder_min = 2640,     # retract
+            angle_max   = 5,        # extend
+            angle_min   = 75,       # retract
+            length_max  = 13.47,    # extend, inches
+            length_min  = 9.53,     # retract, inches
+            position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
+        ),
+        m2 = Linear_Actuator(  # forearm
+            encoder_max = 20,           # extended
+            encoder_min = 1930,         # retract
+            angle_max   = 75,           # extend
+            angle_min   = 140,          # retract
+            length_max  = 13.47,        # extend, inches
+            length_min  = 10.03927072,  # retract, inches
+            position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
         )
     )
 
