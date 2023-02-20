@@ -6,7 +6,6 @@ import sys
 # sys.path.append(PATH_TO_ROBOCLAW)
 
 from .roboclaw_3 import Roboclaw
-# from roboclaw_3 import Roboclaw
 from collections import namedtuple
 
 # Windows comport name - "COM8"
@@ -59,7 +58,7 @@ class Motor_Controller:
     # Print speed and encoder values of both motors to terminal
     def print_encoders(self) -> None:
         enc1 = self.rc.ReadEncM1(self.address)
-        print(f"M1: {enc1[1]}" if enc1[0] == 1 else "disconnected")
+        print(f"M1: {enc1[1]}" if enc1[0] == 1 else "disconnected", end=' ')
         enc2 = self.rc.ReadEncM2(self.address)
         print(f"M2: {enc2[1]}" if enc2[0] == 1 else "disconnected")
 
@@ -199,23 +198,33 @@ def main():
         )
     )
 
-    angle1 = float(sys.argv[1]) if len(sys.argv) > 1 else 45
-    angle2 = float(sys.argv[2]) if len(sys.argv) > 2 else 45
+    # angle1 = float(sys.argv[1]) if len(sys.argv) > 1 else 45
+    # angle2 = float(sys.argv[2]) if len(sys.argv) > 2 else 45
 
-    length1 = angle_to_length(mcp2.m1, angle1)
-    length2 = angle_to_length(mcp2.m2, angle2)
+    # length1 = angle_to_length(mcp2.m1, angle1)
+    # length2 = angle_to_length(mcp2.m2, angle2)
 
-    # encoder1 = length_to_enc(mcp2.m1, length1)
-    # encoder2 = length_to_enc(mcp2.m2, length2)
+    # # encoder1 = length_to_enc(mcp2.m1, length1)
+    # # encoder2 = length_to_enc(mcp2.m2, length2)
 
-    encoder1 = angle_to_enc(mcp2.m1, angle1)
-    encoder2 = angle_to_enc(mcp2.m2, angle2)
+    # encoder1 = angle_to_enc(mcp2.m1, angle1)
+    # encoder2 = angle_to_enc(mcp2.m2, angle2)
 
-    print(f"angles: {angle1}  {angle2}")
-    #print(f"lengths: {length1}  {length2}")
+    encoder1 = int(sys.argv[1]) if len(sys.argv) > 1 else 100
+    encoder2 = int(sys.argv[2]) if len(sys.argv) > 2 else 100
+
+    # print(f"angles: {angle1}  {angle2}")
+    # print(f"lengths: {length1}  {length2}")
     print(f"encoders: {encoder1}  {encoder2}")
 
-    set_arm_position(mcp2, angle1, angle2)
+    mcp2.rc.SpeedAccelDeccelPositionM1M2(mcp2.address, 
+        ACCELERATION, SPEED, ACCELERATION, encoder1, 
+        ACCELERATION, SPEED, ACCELERATION, encoder2, 
+        BUFFER_OR_INSTANT 
+    )
+
+    while True:
+        mcp2.print_encoders()
 
 
 if __name__=='__main__':
