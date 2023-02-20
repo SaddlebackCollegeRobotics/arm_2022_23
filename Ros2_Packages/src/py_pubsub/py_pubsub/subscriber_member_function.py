@@ -19,17 +19,16 @@ from std_msgs.msg import Float32MultiArray
 
 # General imports
 import time
-from . import arm_controller
-from arm_controller import *
+from .arm_controller import *
 
 class MinimalSubscriber(Node):
 
     def __init__(self):
         
-        mcp1 = Motor_Controller(...)
+        #self.mcp1 = Motor_Controller(...)
 
         # motor controller with forearm and bicep linear
-        mcp2 = Motor_Controller(
+        self.mcp2 = Motor_Controller(
             rc = Roboclaw(COMPORT_NAME, 115200),
             address = 0x80,  
             m1 = Linear_Actuator(  # bicep 
@@ -52,7 +51,7 @@ class MinimalSubscriber(Node):
             )
         )
 
-        mcp3 = Motor_Controller(...)
+        #mcp3 = Motor_Controller(...)
 
         # remember previous positions
         self.bicep_angle, self.forearm_angle, self.base_angle = (-1,-1,-1)
@@ -76,15 +75,15 @@ class MinimalSubscriber(Node):
         
         # only change the arm position if any angles have changed
         if (bicep_angle != self.bicep_angle or forearm_angle != self.forearm_angle):
-            arm_controller.set_arm_position(self.mcp2, bicep_angle, forearm_angle)
+            set_arm_position(self.mcp2, bicep_angle, forearm_angle)
             self.bicep_angle, self.forearm_angle = bicep_angle, forearm_angle
 
         if (base_angle != self.base_angle):
-            #arm_controller.set_arm_rotation(self.mcp..., base_angle)
+            #set_arm_rotation(self.mcp..., base_angle)
             self.base_angle = base_angle
 
         if (pitch_angle != self.pitch_angle or roll_angle != self.roll_angle):
-            #arm_controller.set_hand_rotation(self.mcp..., pitch_angle, roll_angle)
+            #set_hand_rotation(self.mcp..., pitch_angle, roll_angle)
             self.pitch_angle, self.roll_angle = pitch_angle, roll_angle
 
         # TODO control finger moevement

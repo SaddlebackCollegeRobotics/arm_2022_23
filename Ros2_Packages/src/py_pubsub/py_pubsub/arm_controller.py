@@ -5,7 +5,8 @@ import sys
 # PATH_TO_ROBOCLAW = "../../lib/roboclaw_python"
 # sys.path.append(PATH_TO_ROBOCLAW)
 
-from roboclaw_3 import Roboclaw
+from .roboclaw_3 import Roboclaw
+# from roboclaw_3 import Roboclaw
 from collections import namedtuple
 
 # Windows comport name - "COM8"
@@ -90,10 +91,12 @@ def length_to_enc(motor : Linear_Actuator, length : float) -> int:
 # Set position of arm using PID function.
 def set_arm_position(mcp: Motor_Controller, bicep_angle: float, forearm_angle: float) -> None:
     
-    encoder_val_m1 = mcp.m1.angle_to_enc(bicep_angle)
-    #encoder_val_m1 = mcp.m1.length_to_enc( mcp.m1.angle_to_length(bicep_angle))
-    encoder_val_m2 = mcp.m2.angle_to_enc(forearm_angle)
-    #encoder_val_m2 = mcp.m2.length_to_enc( mcp.m2.angle_to_length(forearm_angle))
+    encoder_val_m1 = angle_to_enc(mcp.m1, bicep_angle)
+    #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, bicep_angle))
+    encoder_val_m2 = angle_to_enc(mcp.m2, forearm_angle)
+    #encoder_val_m2 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, forearm_angle))
+
+    # print(encoder_val_m1, " ", encoder_val_m2)    
 
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
         ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
@@ -102,18 +105,18 @@ def set_arm_position(mcp: Motor_Controller, bicep_angle: float, forearm_angle: f
     )
 
 def set_arm_rotation(mcp: Motor_Controller, base_angle : float) -> None:
-    encoder_val_m1 = mcp.m1.angle_to_enc(base_angle)
-    #encoder_val_m1 = mcp.m1.length_to_enc( mcp.m1.angle_to_length(base_angle))
+    encoder_val = angle_to_enc(mcp.m1, base_angle)
+    #encoder_val = length_to_enc(mcp.m1, mcp.m1.angle_to_length(mcp.m1, base_angle))
 
     mcp.rc.SpeedAccelDeccelPositionM1(mcp.address, 
-        ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, BUFFER_OR_INSTANT
+        ACCELERATION, SPEED, ACCELERATION, encoder_val, BUFFER_OR_INSTANT
     )
 
 def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float) -> None:
-    encoder_val_m1 = mcp.m1.angle_to_enc(hand_pitch)
-    #encoder_val_m1 = mcp.m1.length_to_enc( mcp.m1.angle_to_length(hand_pitch))
-    encoder_val_m2 = mcp.m2.angle_to_enc(hand_roll)
-    #encoder_val_m2 = mcp.m2.length_to_enc( mcp.m2.angle_to_length(hand_roll))
+    encoder_val_m1 = angle_to_enc(mcp.m1, hand_pitch)
+    #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, hand_pitch))
+    encoder_val_m2 = angle_to_enc(mcp.m2, hand_roll)
+    #encoder_val_m2 = length_to_enc(mcp.m2, angle_to_length(mcp.m2, hand_roll))
 
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
         ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
@@ -156,25 +159,26 @@ def main():
     )
 
     # motor controller with forearm and bicep linear
+    # motor controller with forearm and bicep linear
     mcp2 = Motor_Controller(
         rc = Roboclaw(COMPORT_NAME, 115200),
         address = 0x80,  
         m1 = Linear_Actuator(  # bicep 
-            encoder_max = 30,       # extended
-            encoder_min = 2640,     # retract
-            angle_max   = 5,        # extend
-            angle_min   = 75,       # retract
-            length_max  = 13.47,    # extend, inches
-            length_min  = 9.53,     # retract, inches
+            encoder_max = 2633,      # retract
+            encoder_min = 25,        # extend
+            angle_max   = 75,        # retract
+            angle_min   = 5,         # extend
+            length_max  = 9.53,      # retract, inches
+            length_min  = 13.47,     # extend, inches
             position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
         ),
         m2 = Linear_Actuator(  # forearm
-            encoder_max = 20,           # extended
-            encoder_min = 1930,         # retract
-            angle_max   = 75,           # extend
-            angle_min   = 140,          # retract
-            length_max  = 13.47,        # extend, inches
-            length_min  = 10.03927072,  # retract, inches
+            encoder_max = 1893,         # retract
+            encoder_min = 20,           # extend
+            angle_max   = 140,          # retract
+            angle_min   = 75,           # extend
+            length_max  = 10.03927072,  # retract, inches
+            length_min  = 13.47,        # extend, inches
             position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
         )
     )
@@ -198,18 +202,20 @@ def main():
     angle1 = float(sys.argv[1]) if len(sys.argv) > 1 else 45
     angle2 = float(sys.argv[2]) if len(sys.argv) > 2 else 45
 
-    length1 = angle_to_length(mcp1.m1, angle1)
-    length2 = angle_to_length(mcp1.m2, angle2)
+    length1 = angle_to_length(mcp2.m1, angle1)
+    length2 = angle_to_length(mcp2.m2, angle2)
 
-    # encoder1 = length_to_enc(mcp1.m1, length1)
-    # encoder2 = length_to_enc(mcp1.m2, length2)
+    # encoder1 = length_to_enc(mcp2.m1, length1)
+    # encoder2 = length_to_enc(mcp2.m2, length2)
 
-    encoder1 = angle_to_enc(mcp1.m1, angle1)
-    encoder2 = angle_to_enc(mcp1.m2, angle2)
+    encoder1 = angle_to_enc(mcp2.m1, angle1)
+    encoder2 = angle_to_enc(mcp2.m2, angle2)
 
     print(f"angles: {angle1}  {angle2}")
     #print(f"lengths: {length1}  {length2}")
     print(f"encoders: {encoder1}  {encoder2}")
+
+    set_arm_position(mcp2, angle1, angle2)
 
 
 if __name__=='__main__':
