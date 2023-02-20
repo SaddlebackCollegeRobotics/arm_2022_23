@@ -18,13 +18,27 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 
 # General imports
-import time
+from time import perf_counter
 from .arm_controller import *
+import signal
+
+
+
+
+
 
 class MinimalSubscriber(Node):
 
+        # Signal handler for Ctrl+C
+    def signalHandler(self, signal, frame):
+        self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
+        self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+        print("\nExited Cleanly")
+        quit()
+
     def __init__(self):
-        
+        signal.signal(signal.SIGINT, self.signalHandler)
+
         #self.mcp1 = Motor_Controller(...)
 
         # motor controller with forearm and bicep linear
@@ -68,23 +82,28 @@ class MinimalSubscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
+        self.time_of_last_callback = perf_counter()
+        timer_period = 0.1
+        self.timer = self.create_timer(timer_period, self.doomsday)
+
+    def doomsday(self):
+        if perf_counter() - self.time_of_last_callback > 1:  # doomsday triggers at 1 second
+            self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
+            self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+
     # called every time the subscriber receives a message
     def listener_callback(self, msg):
+        self.time_of_last_callback = perf_counter()
+
         bicep_angle, forearm_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
         pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
         
         # only change the arm position if any angles have changed
-        if (bicep_angle != self.bicep_angle or forearm_angle != self.forearm_angle):
-            set_arm_position(self.mcp2, bicep_angle, forearm_angle)
-            self.bicep_angle, self.forearm_angle = bicep_angle, forearm_angle
+        set_arm_position(self.mcp2, bicep_angle, forearm_angle)
 
-        if (base_angle != self.base_angle):
-            #set_arm_rotation(self.mcp..., base_angle)
-            self.base_angle = base_angle
+        #set_arm_rotation(self.mcp..., base_angle)
 
-        if (pitch_angle != self.pitch_angle or roll_angle != self.roll_angle):
-            #set_hand_rotation(self.mcp..., pitch_angle, roll_angle)
-            self.pitch_angle, self.roll_angle = pitch_angle, roll_angle
+        #set_hand_rotation(self.mcp..., pitch_angle, roll_angle)
 
         # TODO control finger moevement
         #arm_controller.set_arm_position(self.mcp3, finger_velocity)
