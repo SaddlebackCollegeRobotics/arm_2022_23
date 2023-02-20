@@ -55,7 +55,7 @@ class MinimalSubscriber(Node):
         mcp3 = Motor_Controller(...)
 
         # remember previous positions
-        self.shoulder_angle, self.elbow_angle, self.base_angle = (-1,-1,-1)
+        self.bicep_angle, self.forearm_angle, self.base_angle = (-1,-1,-1)
         self.pitch_angle, self.roll_angle = (-1, -1)
 
         # Give the node a name.
@@ -71,23 +71,24 @@ class MinimalSubscriber(Node):
 
     # called every time the subscriber receives a message
     def listener_callback(self, msg):
-        shoulder_angle, elbow_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
+        bicep_angle, forearm_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
         pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
         
         # only change the arm position if any angles have changed
-        if (shoulder_angle != self.shoulder_angle or elbow_angle != self.elbow_angle):
-            #arm_controller.set_arm_position(self.mcp1, shoulder_angle, elbow_angle)
-            self.shoulder_angle, self.elbow_angle = shoulder_angle, elbow_angle
+        if (bicep_angle != self.bicep_angle or forearm_angle != self.forearm_angle):
+            arm_controller.set_arm_position(self.mcp2, bicep_angle, forearm_angle)
+            self.bicep_angle, self.forearm_angle = bicep_angle, forearm_angle
 
         if (base_angle != self.base_angle):
-            #arm_controller.set_arm_rotation(self.mcp3, base_angle)
+            #arm_controller.set_arm_rotation(self.mcp..., base_angle)
             self.base_angle = base_angle
 
         if (pitch_angle != self.pitch_angle or roll_angle != self.roll_angle):
-            #arm_controller.set_hand_rotation(self.mcp2, pitch_angle, roll_angle)
+            #arm_controller.set_hand_rotation(self.mcp..., pitch_angle, roll_angle)
             self.pitch_angle, self.roll_angle = pitch_angle, roll_angle
 
-        arm_controller.set_arm_position(self.mcp3, finger_velocity)
+        # TODO control finger moevement
+        #arm_controller.set_arm_position(self.mcp3, finger_velocity)
 
         # This prints an info message to the console, along with the data it received. 
         for x in msg.data: print(x, end=' ')
