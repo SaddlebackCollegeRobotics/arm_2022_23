@@ -29,21 +29,44 @@ import signal
 
 class MinimalSubscriber(Node):
 
-        # Signal handler for Ctrl+C
+        # Callback for Ctrl+C
     def signalHandler(self, signal, frame):
-        self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
-        self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+        # self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
+        # self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
         print("\nExited Cleanly")
         quit()
 
     def __init__(self):
+
+        # Signal handler for Ctrl+C
         signal.signal(signal.SIGINT, self.signalHandler)
 
-        #self.mcp1 = Motor_Controller(...)
 
-        # motor controller with forearm and bicep linear
+        # TODO - need to have these motors use PID position rather than encoder values.
+        # May want to do this for lin actuators as well. need to test 
+        
+        # motor controller for end-effector pitch and roll
+        self.mcp1 = Motor_Controller(
+            rc = Roboclaw(COMPORT_NAME_2, 115200),
+            address = 0x80,  
+            m1 = Rotation_Motor(  # roll 
+                encoder_max = 6580,      # Max PID position
+                encoder_min = -6583,        # Min PID position
+                angle_max   = 90,        # retract
+                angle_min   = -90,         # extend
+            ),
+            m2 = Rotation_Motor(  # pitch
+                encoder_max = 7656,         # Max PID position
+                encoder_min = -6722,           # Min PID position
+                angle_max   = 90,          # retract
+                angle_min   = -90,           # extend
+            )
+        )
+
+
+        # motor controller for forearm and bicep linear actuators
         self.mcp2 = Motor_Controller(
-            rc = Roboclaw(COMPORT_NAME, 115200),
+            rc = Roboclaw(COMPORT_NAME_1, 115200),
             address = 0x80,  
             m1 = Linear_Actuator(  # bicep 
                 encoder_max = 2633,      # retract
@@ -65,6 +88,10 @@ class MinimalSubscriber(Node):
             )
         )
 
+        # TODO - temp set quad encs to zero
+        self.mcp1.rc.SetEncM1(self.mcp1.address, 0)
+        self.mcp1.rc.SetEncM2(self.mcp1.address, 0)
+
         #mcp3 = Motor_Controller(...)
 
         # remember previous positions
@@ -82,18 +109,20 @@ class MinimalSubscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.time_of_last_callback = perf_counter()
-        timer_period = 0.1
-        self.timer = self.create_timer(timer_period, self.doomsday)
+        # self.time_of_last_callback = perf_counter()
+        # timer_period = 0.1
+        # self.timer = self.create_timer(timer_period, self.doomsday)
 
     def doomsday(self):
-        if perf_counter() - self.time_of_last_callback > 1:  # doomsday triggers at 1 second
-            self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
-            self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+        # if perf_counter() - self.time_of_last_callback > 1:  # doomsday triggers at 1 second
+            # self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
+            # self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+            # TODO - May not need doomsday func anymore
+            ...
 
     # called every time the subscriber receives a message
     def listener_callback(self, msg):
-        self.time_of_last_callback = perf_counter()
+        # self.time_of_last_callback = perf_counter()
 
         bicep_angle, forearm_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
         pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
@@ -103,14 +132,15 @@ class MinimalSubscriber(Node):
 
         #set_arm_rotation(self.mcp..., base_angle)
 
-        #set_hand_rotation(self.mcp..., pitch_angle, roll_angle)
+        print(pitch_angle, roll_angle)
+        set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
 
         # TODO control finger moevement
         #arm_controller.set_arm_position(self.mcp3, finger_velocity)
 
         # This prints an info message to the console, along with the data it received. 
-        for x in msg.data: print(x, end=' ')
-        print()
+        # for x in msg.data: print(x, end=' ')
+        # print()
         
 
 

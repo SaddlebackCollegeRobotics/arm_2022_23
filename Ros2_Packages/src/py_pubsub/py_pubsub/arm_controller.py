@@ -11,7 +11,10 @@ from collections import namedtuple
 # Windows comport name - "COM8"
 # Linux comport name - "/dev/ttyACM1"
 # OSX comport name - "/dev/tty.usbmodem1301"
-COMPORT_NAME = "/dev/ttyACM0"
+
+# TODO - Need to find better way to do this.
+COMPORT_NAME_1 = "/dev/ttyACM0"
+COMPORT_NAME_2 = "/dev/ttyACM1"
 
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
 
@@ -89,7 +92,7 @@ def length_to_enc(motor : Linear_Actuator, length : float) -> int:
 
 # Set position of arm using PID function.
 def set_arm_position(mcp: Motor_Controller, bicep_angle: float, forearm_angle: float) -> None:
-    
+
     encoder_val_m1 = angle_to_enc(mcp.m1, bicep_angle)
     #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, bicep_angle))
     encoder_val_m2 = angle_to_enc(mcp.m2, forearm_angle)
@@ -112,14 +115,21 @@ def set_arm_rotation(mcp: Motor_Controller, base_angle : float) -> None:
     )
 
 def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float) -> None:
-    encoder_val_m1 = angle_to_enc(mcp.m1, hand_pitch)
+
+    encoder_val_m1 = angle_to_enc(mcp.m1, hand_roll)
+    encoder_val_m2 = angle_to_enc(mcp.m2, hand_pitch)
     #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, hand_pitch))
-    encoder_val_m2 = angle_to_enc(mcp.m2, hand_roll)
     #encoder_val_m2 = length_to_enc(mcp.m2, angle_to_length(mcp.m2, hand_roll))
 
+    # mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
+    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
+    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m2, 
+    #     BUFFER_OR_INSTANT 
+    # )
+
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-        ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
-        ACCELERATION, SPEED, ACCELERATION, encoder_val_m2, 
+        ACCELERATION, 1500, ACCELERATION, encoder_val_m1, 
+        ACCELERATION, 1500, ACCELERATION, encoder_val_m2, 
         BUFFER_OR_INSTANT 
     )
 
@@ -141,7 +151,7 @@ def open_close_hand(mcp: Motor_Controller, move_velocity):
 def main():
     # motor controller with hand pitch and roll 
     mcp1 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME, 115200),  #TODO figure out correct comport
+        rc = Roboclaw(COMPORT_NAME_1, 115200),  #TODO figure out correct comport
         address = 0x0,  #TODO set val
         m1 = Rotation_Motor(  # pitch motor
             encoder_max = 0,  #TODO set value
@@ -160,7 +170,7 @@ def main():
     # motor controller with forearm and bicep linear
     # motor controller with forearm and bicep linear
     mcp2 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME, 115200),
+        rc = Roboclaw(COMPORT_NAME_1, 115200),
         address = 0x80,  
         m1 = Linear_Actuator(  # bicep 
             encoder_max = 2633,      # retract
@@ -184,7 +194,7 @@ def main():
 
     # motor controller with hand pitch and roll motors 
     mcp3 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME, 115200),  #TODO figure out correct comport
+        rc = Roboclaw(COMPORT_NAME_1, 115200),  #TODO figure out correct comport
         address = 0x0,  #TODO set val
         m1 = Rotation_Motor(  # pitch motor
             encoder_max = 0,  #TODO set value
