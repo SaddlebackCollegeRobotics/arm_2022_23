@@ -5,15 +5,18 @@ using UnityEngine;
 
 public class IK_Target : DragableObject
 {
-    [SerializeField] private Collider2D targetBounds;      // Position limiting bounds of the target.
-    [SerializeField] private float smoothTime = 0.5f;      // Smooths target movement while using axis control.
-    [SerializeField] private float speedFactor = 1.5f;     // A factor to control target speed while using axis control.
+    [SerializeField] private Collider2D targetBounds; // Position limiting bounds of the target.
+    [SerializeField] private float smoothTime = 0.5f; // Smooths target movement while using axis control.
+    [SerializeField] private float speedFactor = 1.5f; // A factor to control target speed while using axis control.
     
     private bool moveWithGamepad = false; // Should the target move using gamepad / keyboard axis.
 
     private float horizontal; // Horizontal controls axis.
     private float vertical; // Vertical controls axis.
+    private float left_trigger; // Left trigger axis
     private Vector3 currentVelocity = Vector3.zero; // Used in the smoothing calculation.
+
+    bool wasHoldingSafetyTrigger = false; // Flag for if the left trigger was held in the last frame.
 
 
     // Start is called before the first frame update
@@ -82,7 +85,19 @@ public class IK_Target : DragableObject
         horizontal = Input.GetAxis("Horizontal");
         vertical = Input.GetAxis("Vertical");
         
-        transform.position = Vector3.SmoothDamp(transform.position, transform.position + new Vector3(horizontal, vertical, 0) * speedFactor * Time.deltaTime, ref currentVelocity, smoothTime);
+        left_trigger = Input.GetAxis("Left_Trigger");
+       
+
+        if (left_trigger < 0 || Input.GetKey(KeyCode.LeftShift))
+        {
+            wasHoldingSafetyTrigger = true;
+            transform.position = Vector3.SmoothDamp(transform.position, transform.position + new Vector3(horizontal, vertical, 0) * speedFactor * Time.deltaTime, ref currentVelocity, smoothTime);
+        }
+        else if (wasHoldingSafetyTrigger)
+        {
+            wasHoldingSafetyTrigger = false;
+            currentVelocity = Vector3.zero;
+        }
     }
 
     public void SetMoveWithGamepad(bool b)

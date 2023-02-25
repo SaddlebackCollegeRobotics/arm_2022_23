@@ -42,7 +42,7 @@ class MinimalSubscriber(Node):
         signal.signal(signal.SIGINT, self.signalHandler)
 
 
-        # TODO - need to have these motors use PID position rather than encoder values.
+        # TODO - need to have these motors use PID position rather than encoder values? DO for mcp3 as well
         # May want to do this for lin actuators as well. need to test 
         
         # motor controller for end-effector pitch and roll
@@ -90,9 +90,24 @@ class MinimalSubscriber(Node):
             )
         )
 
-        # TODO - temp set quad encs to zero
-        self.mcp1.rc.SetEncM1(self.mcp1.address, 0)
-        self.mcp1.rc.SetEncM2(self.mcp1.address, 0)
+
+        # Motor controller for turret and grip
+        self.mcp3 = Motor_Controller(
+            rc = Roboclaw(COMPORT_NAME_3, 115200),
+            address = 0x80,  
+            m1 = Rotation_Motor(  # Grip 
+                # Note: Grip motor does not have encoder
+            ),
+            m2 = Rotation_Motor(  # Turret
+                # Note: No limit needed for turret. Rotate via velocity rather than position.
+            )
+        )
+
+
+        # TODO - Eventually save previously known value for quad encoders. Do we need this for now?
+        # Set encoder values to zero
+        self.mcp1.rc.SetEncM1(self.mcp1.address, 0) # Roll
+        self.mcp1.rc.SetEncM2(self.mcp1.address, 0) # Pitch
 
         #mcp3 = Motor_Controller(...)
 
@@ -132,13 +147,13 @@ class MinimalSubscriber(Node):
         # only change the arm position if any angles have changed
         set_arm_position(self.mcp2, bicep_angle, forearm_angle)
 
-        #set_arm_rotation(self.mcp..., base_angle)
+        set_arm_rotation(self.mcp3, base_angle)
 
-        print(pitch_angle, roll_angle)
+        # Hand pitch and roll
         set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
 
-        # TODO control finger moevement
-        #arm_controller.set_arm_position(self.mcp3, finger_velocity)
+        # Finger movement
+        open_close_hand(self.mcp3, finger_velocity)
 
         # This prints an info message to the console, along with the data it received. 
         # for x in msg.data: print(x, end=' ')

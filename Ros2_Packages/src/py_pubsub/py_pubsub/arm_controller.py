@@ -116,12 +116,13 @@ def set_arm_position(mcp: Motor_Controller, bicep_angle: float, forearm_angle: f
     )
 
 def set_arm_rotation(mcp: Motor_Controller, base_angle : float) -> None:
-    encoder_val = angle_to_enc(mcp.m1, base_angle)
+    encoder_val = angle_to_enc(mcp.m2, base_angle)
     #encoder_val = length_to_enc(mcp.m1, mcp.m1.angle_to_length(mcp.m1, base_angle))
 
-    mcp.rc.SpeedAccelDeccelPositionM1(mcp.address, 
+    mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
         ACCELERATION, SPEED, ACCELERATION, encoder_val, BUFFER_OR_INSTANT
     )
+
 
 def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float) -> None:
 
@@ -142,17 +143,18 @@ def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float
         BUFFER_OR_INSTANT 
     )
 
+
 def open_close_hand(mcp: Motor_Controller, move_velocity):
-    encoder_val = mcp.rc.ReadEncM2(mcp.address)
+    encoder_val = mcp.rc.ReadEncM1(mcp.address)
 
     if move_velocity == 0:
-        mcp.rc.ForwardM2(0)
+        mcp.rc.ForwardM1(0)
 
     elif move_velocity > 0 and encoder_val < mcp.m2.encoder_max:
-        mcp.rc.ForwardM2(move_velocity)
+        mcp.rc.ForwardM1(move_velocity)
     
     elif move_velocity < 0 and encoder_val > mcp.m2.encoder_min:
-        mcp.rc.BackwardM2(math.abs(move_velocity))
+        mcp.rc.BackwardM1(math.abs(move_velocity))
 
 
 

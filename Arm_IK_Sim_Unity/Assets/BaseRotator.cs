@@ -13,6 +13,8 @@ public class BaseRotator : DragableObject
     private bool moveWithGamepad = false;
     private float currentRotation;
     private float hatHorizontal;
+    private float left_trigger;
+    private bool wasHoldingSafetyTrigger = false;
 
     void Start()
     {
@@ -24,10 +26,14 @@ public class BaseRotator : DragableObject
     {
         if (moveWithGamepad)
         {
-            MoveUsingAxis();
+            HandleGamepadInput();
         }
 
-        LimitAngle();
+        if (wasHoldingSafetyTrigger)
+        {
+            LimitAngle();
+            transform.rotation = Quaternion.Euler(0, currentRotation, 0);
+        }
     }
 
 
@@ -46,12 +52,24 @@ public class BaseRotator : DragableObject
     protected override void OnMouseReleased(){}
 
 
-    private void MoveUsingAxis()
+    private void HandleGamepadInput()
     {
+        left_trigger = Input.GetAxis("Left_Trigger");
         hatHorizontal = Input.GetAxis("HatHorizontal");
 
-        currentJoystickValue = Vector3.SmoothDamp(currentJoystickValue, new Vector3(hatHorizontal, 0, 0), ref currentVelocity, smoothTime);
-        currentRotation = transform.rotation.eulerAngles.y + (-currentJoystickValue.x * speedFactor * Time.deltaTime);
+        if (left_trigger < 0)
+        {
+            wasHoldingSafetyTrigger = true;
+            
+            currentJoystickValue = Vector3.SmoothDamp(currentJoystickValue, new Vector3(hatHorizontal, 0, 0), ref currentVelocity, smoothTime);
+            currentRotation = transform.rotation.eulerAngles.y + (-currentJoystickValue.x * speedFactor * Time.deltaTime);
+        }
+        else if (wasHoldingSafetyTrigger)
+        {
+            wasHoldingSafetyTrigger = false;
+            currentVelocity = Vector3.zero;
+            currentJoystickValue = Vector3.zero;
+        }
     }
 
 
@@ -67,8 +85,6 @@ public class BaseRotator : DragableObject
         {
             currentRotation = limitHinge.min;
         }
-
-        transform.rotation = Quaternion.Euler(0, currentRotation, 0);
     }
 
 
