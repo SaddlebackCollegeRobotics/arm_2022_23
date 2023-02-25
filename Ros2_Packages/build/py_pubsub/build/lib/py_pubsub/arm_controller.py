@@ -15,17 +15,18 @@ from collections import namedtuple
 # TODO - Need to find better way to do this.
 COMPORT_NAME_1 = "/dev/ttyACM0"
 COMPORT_NAME_2 = "/dev/ttyACM1"
+COMPORT_NAME_3 = "/dev/ttyACM2"
 
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
 
 SPEED = 850 #600
 ACCELERATION = 700 #200
 
-# linear actuator position tuple
+# linear actuator 
 # d (inches) - distance from joint of arm to linear actuator
 # h (inches) - vertical height between linear actuator base and arm hinge
 # l (inches) - horizontal length between linear actuator base and arm hinge
-actuator_pos = namedtuple('actuator_pos', 'd h l')
+actuator_tri = namedtuple('actuator_tri', 'a b theta')
 
 @dataclass(frozen=True)
 class Angle:
@@ -41,7 +42,7 @@ class Encoder:
 class Linear_Actuator(Encoder, Angle):
     length_min : float 
     length_max : float 
-    position_on_arm : actuator_pos 
+    position_on_arm : actuator_tri 
 
 @dataclass(frozen=True)
 class Rotation_Motor(Encoder, Angle):
@@ -77,8 +78,11 @@ def angle_to_enc(motor : Linear_Actuator or Rotation_Motor, angle : float) -> in
 #NOTE use encoder.angle_to_enc for now, angle_to_length not currently working
 # Convert angle linear actuator lengths taking into account min/max angles and length values.
 def angle_to_length(motor : Linear_Actuator, angle : float) -> float:
-    d, h, l = motor.position_on_arm 
-    actuator_length = math.sqrt( math.pow(l + d*math.cos(angle) , 2) + math.pow(h - d*math.sin(angle) , 2) )
+    a, b, theta = motor.position_on_arm 
+    
+    # Law of cosines
+    actuator_length = math.sqrt(math.pow(a, 2) + math.pow(b, 2) - (2 * a * b * math.cos(180 - angle - theta)))
+
     return actuator_length
 
 #NOTE correctly maps between length and encoder values
@@ -96,9 +100,14 @@ def set_arm_position(mcp: Motor_Controller, bicep_angle: float, forearm_angle: f
     encoder_val_m1 = angle_to_enc(mcp.m1, bicep_angle)
     #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, bicep_angle))
     encoder_val_m2 = angle_to_enc(mcp.m2, forearm_angle)
-    #encoder_val_m2 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, forearm_angle))
+    
 
-    # print(encoder_val_m1, " ", encoder_val_m2)    
+    # encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, bicep_angle))
+    # encoder_val_m2 = length_to_enc(mcp.m2, angle_to_length(mcp.m2, forearm_angle))
+
+    # print(bicep_angle, " ", encoder_val_m1, " ", )
+
+    print(encoder_val_m1, " ", bicep_angle, " ", encoder_val_m2, " ", forearm_angle)    
 
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
         ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
@@ -128,8 +137,8 @@ def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float
     # )
 
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-        ACCELERATION, 1500, ACCELERATION, encoder_val_m1, 
-        ACCELERATION, 1500, ACCELERATION, encoder_val_m2, 
+        ACCELERATION, 3000, ACCELERATION, encoder_val_m1, 
+        ACCELERATION, 3000, ACCELERATION, encoder_val_m2, 
         BUFFER_OR_INSTANT 
     )
 

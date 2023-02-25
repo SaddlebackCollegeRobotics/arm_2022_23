@@ -73,18 +73,20 @@ class MinimalSubscriber(Node):
                 encoder_min = 25,        # extend
                 angle_max   = 75,        # retract
                 angle_min   = 5,         # extend
-                length_max  = 9.53,      # retract, inches
-                length_min  = 13.47,     # extend, inches
-                position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
+                length_max  = 34.2138,   # extend, centimeters
+                length_min  = 24.2062,   # retract, centimeters
+                # position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
+                position_on_arm = actuator_tri(16.7042, 18.2046, 8.75) # (cm, cm, deg)
             ),
             m2 = Linear_Actuator(  # forearm
                 encoder_max = 1893,         # retract
                 encoder_min = 20,           # extend
                 angle_max   = 140,          # retract
                 angle_min   = 75,           # extend
-                length_max  = 10.03927072,  # retract, inches
-                length_min  = 13.47,        # extend, inches
-                position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
+                length_max  = 34.2138,      # extend, centimeters
+                length_min  = 25.4762,      # retract, centimeters
+                # position_on_arm = actuator_tri(3.0, 1.125, 12.50719421)  # inches
+                position_on_arm = actuator_tri(31.8965, 7.62, 5.14) # (cm, cm, deg)
             )
         )
 
