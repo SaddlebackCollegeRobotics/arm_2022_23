@@ -18,42 +18,102 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 
 # General imports
-import time
-from . import arm_controller
-from arm_controller import *
+from time import perf_counter
+from .arm_controller import *
+import signal
+
+
+
+
+
 
 class MinimalSubscriber(Node):
 
+        # Callback for Ctrl+C
+    def signalHandler(self, signal, frame):
+        # self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
+        # self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+        print("\nExited Cleanly")
+        quit()
+
     def __init__(self):
-        # Create instance of a motor controller.
+
+        # Signal handler for Ctrl+C
+        signal.signal(signal.SIGINT, self.signalHandler)
+
+
+        # TODO - need to have these motors use PID position rather than encoder values? DO for mcp3 as well
+        # May want to do this for lin actuators as well. need to test 
+        
+        # motor controller for end-effector pitch and roll
         self.mcp1 = Motor_Controller(
-            rc = Roboclaw(COMPORT_NAME, 115200),
+            rc = Roboclaw(COMPORT_NAME_2, 115200),
             address = 0x80,  
-            m1 = Encoder(  # elbow joint
-                encoder_extend = 20, #20
-                encoder_retract = 1930, # 1930
-
-                angle_extend = 75,
-                angle_retract = 140,
-
-                length_extend = 13.47,  # inches
-                length_retract = 10.03927072,  # inches
-
-                actuator_pos = LINEAR_ACTUATOR_POS(3.0, 1.125, 12.50719421)
+            m1 = Rotation_Motor(  # roll 
+                encoder_max = 6580,      # Max PID position
+                encoder_min = -6583,        # Min PID position
+                angle_max   = 90,        # retract
+                angle_min   = -90,         # extend
             ),
-            m2 = Encoder(  # shoulder joint
-                encoder_extend = 30, #30
-                encoder_retract = 2640, #2640
-                
-                angle_extend = 5,
-                angle_retract = 75,
-
-                length_extend = 13.47,  # inches
-                length_retract = 9.53,  # inches
-
-                actuator_pos = LINEAR_ACTUATOR_POS(7.16717277, 1.0, 6.5)
+            m2 = Rotation_Motor(  # pitch
+                encoder_max = 7656,         # Max PID position
+                encoder_min = -6722,           # Min PID position
+                angle_max   = 90,          # retract
+                angle_min   = -90,           # extend
             )
         )
+
+
+        # motor controller for forearm and bicep linear actuators
+        self.mcp2 = Motor_Controller(
+            rc = Roboclaw(COMPORT_NAME_1, 115200),
+            address = 0x80,  
+            m1 = Linear_Actuator(  # bicep 
+                encoder_max = 2633,      # retract
+                encoder_min = 25,        # extend
+                angle_max   = 75,        # retract
+                angle_min   = 5,         # extend
+                length_max  = 34.2138,   # extend, centimeters
+                length_min  = 24.2062,   # retract, centimeters
+                # position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
+                position_on_arm = actuator_tri(16.7042, 18.2046, 8.75) # (cm, cm, deg)
+            ),
+            m2 = Linear_Actuator(  # forearm
+                encoder_max = 1893,         # retract
+                encoder_min = 20,           # extend
+                angle_max   = 140,          # retract
+                angle_min   = 75,           # extend
+                length_max  = 34.2138,      # extend, centimeters
+                length_min  = 25.4762,      # retract, centimeters
+                # position_on_arm = actuator_tri(3.0, 1.125, 12.50719421)  # inches
+                position_on_arm = actuator_tri(31.8965, 7.62, 5.14) # (cm, cm, deg)
+            )
+        )
+
+
+        # Motor controller for turret and grip
+        self.mcp3 = Motor_Controller(
+            rc = Roboclaw(COMPORT_NAME_3, 115200),
+            address = 0x80,  
+            m1 = Rotation_Motor(  # Grip 
+                # Note: Grip motor does not have encoder
+            ),
+            m2 = Rotation_Motor(  # Turret
+                # Note: No limit needed for turret. Rotate via velocity rather than position.
+            )
+        )
+
+
+        # TODO - Eventually save previously known value for quad encoders. Do we need this for now?
+        # Set encoder values to zero
+        self.mcp1.rc.SetEncM1(self.mcp1.address, 0) # Roll
+        self.mcp1.rc.SetEncM2(self.mcp1.address, 0) # Pitch
+
+        #mcp3 = Motor_Controller(...)
+
+        # remember previous positions
+        self.bicep_angle, self.forearm_angle, self.base_angle = (-1,-1,-1)
+        self.pitch_angle, self.roll_angle = (-1, -1)
 
         # Give the node a name.
         super().__init__('minimal_subscriber')
@@ -66,10 +126,38 @@ class MinimalSubscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-    # This callback definition simply prints an info message to the console, along with the data it received. 
+        # self.time_of_last_callback = perf_counter()
+        # timer_period = 0.1
+        # self.timer = self.create_timer(timer_period, self.doomsday)
+
+    def doomsday(self):
+        # if perf_counter() - self.time_of_last_callback > 1:  # doomsday triggers at 1 second
+            # self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
+            # self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+            # TODO - May not need doomsday func anymore
+            ...
+
+    # called every time the subscriber receives a message
     def listener_callback(self, msg):
-        # print(msg.data[0], " ", msg.data[1], " ", msg.data[2])
-        arm_controller.set_arm_position(self.mcp1, msg.data[0], msg.data[1], msg.data[2])
+        # self.time_of_last_callback = perf_counter()
+
+        bicep_angle, forearm_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
+        pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
+        
+        # only change the arm position if any angles have changed
+        set_arm_position(self.mcp2, bicep_angle, forearm_angle)
+
+        set_arm_rotation(self.mcp3, base_angle)
+
+        # Hand pitch and roll
+        set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
+
+        # Finger movement
+        open_close_hand(self.mcp3, finger_velocity)
+
+        # This prints an info message to the console, along with the data it received. 
+        # for x in msg.data: print(x, end=' ')
+        # print()
         
 
 
