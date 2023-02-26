@@ -1,0 +1,27 @@
+[1.744s] Invoking command in '/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/src/py_pubsub': PYTHONPATH=/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/prefix_override:/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_pubsub build --build-base /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build install --record /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/install.log --single-version-externally-managed
+[2.468s] running egg_info
+[2.470s] writing ../../build/py_pubsub/py_pubsub.egg-info/PKG-INFO
+[2.472s] writing dependency_links to ../../build/py_pubsub/py_pubsub.egg-info/dependency_links.txt
+[2.473s] writing entry points to ../../build/py_pubsub/py_pubsub.egg-info/entry_points.txt
+[2.474s] writing requirements to ../../build/py_pubsub/py_pubsub.egg-info/requires.txt
+[2.474s] writing top-level names to ../../build/py_pubsub/py_pubsub.egg-info/top_level.txt
+[2.485s] reading manifest file '../../build/py_pubsub/py_pubsub.egg-info/SOURCES.txt'
+[2.495s] writing manifest file '../../build/py_pubsub/py_pubsub.egg-info/SOURCES.txt'
+[2.496s] running build
+[2.496s] running build_py
+[2.502s] copying py_pubsub/subscriber_member_function.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub
+[2.506s] running install
+[2.507s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[2.508s]   warnings.warn(
+[2.508s] running install_lib
+[2.519s] copying /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build/lib/py_pubsub/subscriber_member_function.py -> /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub
+[2.532s] byte-compiling /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub/subscriber_member_function.py to subscriber_member_function.cpython-310.pyc
+[2.540s] running install_data
+[2.544s] running install_egg_info
+[2.549s] removing '/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub-0.0.0-py3.10.egg-info' (and everything under it)
+[2.556s] Copying ../../build/py_pubsub/py_pubsub.egg-info to /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages/py_pubsub-0.0.0-py3.10.egg-info
+[2.583s] running install_scripts
+[2.646s] Installing listener script to /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/py_pubsub
+[2.648s] Installing talker script to /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/py_pubsub
+[2.650s] writing list of installed files to '/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/install.log'
+[2.710s] Invoked command in '/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/src/py_pubsub' returned '0': PYTHONPATH=/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/prefix_override:/media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/install/py_pubsub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_pubsub build --build-base /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/build install --record /media/cameron/Internal SSD 2/Projects/Unity/arm_2022_23/Ros2_Packages/build/py_pubsub/install.log --single-version-externally-managed

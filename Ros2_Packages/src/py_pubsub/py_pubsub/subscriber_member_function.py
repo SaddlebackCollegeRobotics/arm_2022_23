@@ -70,7 +70,7 @@ class MinimalSubscriber(Node):
             address = 0x80,  
             m1 = Linear_Actuator(  # bicep 
                 encoder_max = 2633,      # retract
-                encoder_min = 25,        # extend
+                encoder_min = 153,        # extend
                 angle_max   = 75,        # retract
                 angle_min   = 5,         # extend
                 length_max  = 34.2138,   # extend, centimeters
@@ -95,12 +95,16 @@ class MinimalSubscriber(Node):
         self.mcp3 = Motor_Controller(
             rc = Roboclaw(COMPORT_NAME_3, 115200),
             address = 0x80,  
-            m1 = Rotation_Motor(  # Grip 
+            m1 = Gripper_Motor(  # Grip 
                 # Note: Grip motor does not have encoder
             ),
             m2 = Rotation_Motor(  # Turret
                 # Note: No limit needed for turret. Rotate via velocity rather than position.
-            )
+                angle_min = -120,
+                angle_max = 120,
+                encoder_max = 13993,
+                encoder_min = -11314
+             )
         )
 
 
@@ -108,6 +112,7 @@ class MinimalSubscriber(Node):
         # Set encoder values to zero
         self.mcp1.rc.SetEncM1(self.mcp1.address, 0) # Roll
         self.mcp1.rc.SetEncM2(self.mcp1.address, 0) # Pitch
+        self.mcp3.rc.SetEncM2(self.mcp3.address, 0) # Turret
 
         #mcp3 = Motor_Controller(...)
 

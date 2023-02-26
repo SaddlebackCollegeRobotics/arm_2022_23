@@ -16,7 +16,7 @@ public class HandManager : MonoBehaviour
     private float rollDir = 0;
 
     [Header("Fingers")]
-    [SerializeField] private float fingerSpeedFactor = 30;
+    [SerializeField] private float fingerSpeedFactor = 100;
     private float gripDir = 0;
     private Vector2 input_axis;
     private Vector2 input_triggers;
@@ -40,6 +40,8 @@ public class HandManager : MonoBehaviour
 
         // Update roll
         rollJoint.localRotation = Quaternion.Euler(rollJoint.localEulerAngles.x + (rollDir * rollSpeedFactor * Time.deltaTime), 0, 0);
+
+        print(fingerSpeedFactor * gripDir);
 
         // Update finger movement direction.
         if (DataPublisher.instance)
@@ -74,17 +76,19 @@ public class HandManager : MonoBehaviour
         // Handle grip controls
         if (input_triggers.y < 0)
         {
-            if (Input.GetButton("Fire2"))
+            if (Input.GetButton("o_button"))
             {
                 // Open grip
                 gripDir = 1;
 
             }
-            else if (Input.GetButton("Fire1"))
+            else if (Input.GetButton("x_button"))
             {
                 // Close grip
                 gripDir = -1;
             }
+
+            
         }
 
     }
