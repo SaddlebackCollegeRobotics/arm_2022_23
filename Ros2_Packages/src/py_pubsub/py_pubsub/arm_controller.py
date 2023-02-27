@@ -19,8 +19,19 @@ COMPORT_NAME_3 = "/dev/ttyACM2"
 
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
 
-SPEED = 850 #600
-ACCELERATION = 700 #200
+# TODO - Eventually change to be put into MotorController declarations
+
+SPEED = 850
+ACCELERATION = 700
+
+ROLL_SPEED = 3000
+ROLL_ACCEL = 2500
+
+PITCH_SPEED = 3000
+PITCH_ACCEL = 2500
+
+TURRET_SPEED = 850
+TURRET_ACCEL = 700
 
 # linear actuator 
 # d (inches) - distance from joint of arm to linear actuator
@@ -120,7 +131,7 @@ def set_arm_rotation(mcp: Motor_Controller, base_angle : float) -> None:
     #encoder_val = length_to_enc(mcp.m1, mcp.m1.angle_to_length(mcp.m1, base_angle))
 
     mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
-        ACCELERATION, SPEED, ACCELERATION, encoder_val, BUFFER_OR_INSTANT
+        TURRET_ACCEL, TURRET_SPEED, TURRET_ACCEL, encoder_val, BUFFER_OR_INSTANT
     )
 
 
@@ -131,15 +142,9 @@ def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float
     #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, hand_pitch))
     #encoder_val_m2 = length_to_enc(mcp.m2, angle_to_length(mcp.m2, hand_roll))
 
-    # mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
-    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m2, 
-    #     BUFFER_OR_INSTANT 
-    # )
-
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-        ACCELERATION, 3000, ACCELERATION, encoder_val_m1, 
-        ACCELERATION, 3000, ACCELERATION, encoder_val_m2, 
+        ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
+        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
         BUFFER_OR_INSTANT 
     )
 
@@ -152,5 +157,5 @@ def open_close_hand(mcp: Motor_Controller, move_velocity):
     else:
         # mcp.rc.SpeedAccelM1(mcp.address, 20, int(move_velocity))
         mcp.rc.SpeedAccelM1(mcp.address, 20, int(move_velocity))
-        
+
 # rm -rf build install log && colcon build && source ./install/setup.bash && ros2 run py_pubsub listener

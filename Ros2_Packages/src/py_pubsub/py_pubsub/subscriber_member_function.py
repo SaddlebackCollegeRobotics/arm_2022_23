@@ -21,20 +21,19 @@ from std_msgs.msg import Float32MultiArray
 from time import perf_counter
 from .arm_controller import *
 import signal
-
-
-
-
+import pyudev
 
 
 class MinimalSubscriber(Node):
 
-        # Callback for Ctrl+C
+    # Callback for Ctrl+C
     def signalHandler(self, signal, frame):
-        # self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
-        # self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
+
         print("\nExited Cleanly")
+
+        self.SoftStop()
         quit()
+
 
     def __init__(self):
 
@@ -42,12 +41,18 @@ class MinimalSubscriber(Node):
         signal.signal(signal.SIGINT, self.signalHandler)
 
 
+        # MCP serial numbers MCP1, MCP2, MCP3
+        self.mcp_serial_list = ['', '', '']
+        self.get_motor_controllers()
+        self.mcp_comport_list = []
+
+
         # TODO - need to have these motors use PID position rather than encoder values? DO for mcp3 as well
         # May want to do this for lin actuators as well. need to test 
         
         # motor controller for end-effector pitch and roll
         self.mcp1 = Motor_Controller(
-            rc = Roboclaw(COMPORT_NAME_2, 115200),
+            rc = Roboclaw(self.mcp_comport_list[0], 115200),
             address = 0x80,  
             m1 = Rotation_Motor(  # roll 
                 encoder_max = 6580,      # Max PID position
@@ -66,7 +71,7 @@ class MinimalSubscriber(Node):
 
         # motor controller for forearm and bicep linear actuators
         self.mcp2 = Motor_Controller(
-            rc = Roboclaw(COMPORT_NAME_1, 115200),
+            rc = Roboclaw(self.mcp_comport_list[1], 115200),
             address = 0x80,  
             m1 = Linear_Actuator(  # bicep 
                 encoder_max = 2633,      # retract
@@ -93,7 +98,7 @@ class MinimalSubscriber(Node):
 
         # Motor controller for turret and grip
         self.mcp3 = Motor_Controller(
-            rc = Roboclaw(COMPORT_NAME_3, 115200),
+            rc = Roboclaw(self.mcp_comport_list[2], 115200),
             address = 0x80,  
             m1 = Gripper_Motor(  # Grip 
                 # Note: Grip motor does not have encoder
@@ -108,17 +113,15 @@ class MinimalSubscriber(Node):
         )
 
 
+        # Create list of motor controllers
+        self.MCP_List = [self.mcp1, self.mcp2, self.mcp3]
+
+
         # TODO - Eventually save previously known value for quad encoders. Do we need this for now?
         # Set encoder values to zero
-        self.mcp1.rc.SetEncM1(self.mcp1.address, 0) # Roll
-        self.mcp1.rc.SetEncM2(self.mcp1.address, 0) # Pitch
-        self.mcp3.rc.SetEncM2(self.mcp3.address, 0) # Turret
-
-        #mcp3 = Motor_Controller(...)
-
-        # remember previous positions
-        self.bicep_angle, self.forearm_angle, self.base_angle = (-1,-1,-1)
-        self.pitch_angle, self.roll_angle = (-1, -1)
+        # self.mcp1.rc.SetEncM1(self.mcp1.address, 0) # Roll
+        # self.mcp1.rc.SetEncM2(self.mcp1.address, 0) # Pitch
+        # self.mcp3.rc.SetEncM2(self.mcp3.address, 0) # Turret
 
         # Give the node a name.
         super().__init__('minimal_subscriber')
@@ -131,20 +134,34 @@ class MinimalSubscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        # self.time_of_last_callback = perf_counter()
-        # timer_period = 0.1
-        # self.timer = self.create_timer(timer_period, self.doomsday)
 
-    def doomsday(self):
-        # if perf_counter() - self.time_of_last_callback > 1:  # doomsday triggers at 1 second
-            # self.mcp2.rc.ForwardM1(self.mcp2.address, 0)
-            # self.mcp2.rc.ForwardM2(self.mcp2.address, 0)
-            # TODO - May not need doomsday func anymore
-            ...
+        self.time_of_last_callback = perf_counter()
+        self.timer_period = 0.1 # Interval for checking heartbeat.
+        self.signal_timeout = 3 # Max time before soft stop if subscription heartbeat is not detected.
+        self.timer = self.create_timer(self.timer_period, self.Subscription_HeartBeat)
+
+
+    # For safety. Check if controls are being received by subscriber callback
+    # Stop motors if subscription not being received.
+    def Subscription_HeartBeat(self):
+        if perf_counter() - self.time_of_last_callback > self.signal_timeout:
+            self.SoftStop()
+
+
+    # Signal to stop all motors
+    def SoftStop(self):
+        
+        print("Soft Stop Triggered")
+
+        for mcp in self.MCP_List:
+            mcp.rc.ForwardM1(mcp.address, 0)
+            mcp.rc.ForwardM2(mcp.address, 0)
+
 
     # called every time the subscriber receives a message
     def listener_callback(self, msg):
-        # self.time_of_last_callback = perf_counter()
+
+        self.time_of_last_callback = perf_counter()
 
         bicep_angle, forearm_angle, base_angle = msg.data[0], msg.data[1], msg.data[2]
         pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
@@ -163,7 +180,24 @@ class MinimalSubscriber(Node):
         # This prints an info message to the console, along with the data it received. 
         # for x in msg.data: print(x, end=' ')
         # print()
-        
+
+
+    def get_motor_controllers(self):
+
+        # Create a context object to access the system's devices
+        context = pyudev.Context()
+
+        # Find the device with the specified serial number
+
+        for serial_number in self.mcp_serial_list:
+            device = context.list_devices(subsystem='tty', ID_SERIAL_SHORT=serial_number)
+            
+            if device:
+                self.mcp_comport_list.append(device[0].device_node)
+                print("Motor Controller Found")
+            else:
+                print("Motor Controller Not Found!")
+
 
 
 def main(args=None):
