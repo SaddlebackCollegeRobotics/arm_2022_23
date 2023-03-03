@@ -26,13 +26,17 @@ import subprocess
 
 class MinimalSubscriber(Node):
 
-    # Callback for Ctrl+C
-    def signalHandler(self, signal, frame):
+    # Quit program safely
+    def quit_program_safely(self):
 
-        print("\nExited Cleanly")
-
+        print("\nExited Safely")
         self.SoftStop()
         quit()
+
+
+    # Callback for Ctrl+C
+    def signalHandler(self, signal, frame):
+        self.quit_program_safely()
 
 
     def __init__(self):
@@ -48,72 +52,10 @@ class MinimalSubscriber(Node):
         # TODO - need to have these motors use PID position rather than encoder values? DO for mcp3 as well
         # May want to do this for lin actuators as well. need to test 
         
-        # motor controller for end-effector pitch and roll
-        self.mcp1 = Motor_Controller(
-            rc = Roboclaw(self.mcp_comport_list[0], 115200),
-            address = 0x80,  
-            m1 = Rotation_Motor(  # roll 
-                encoder_max = 6580,      # Max PID position
-                encoder_min = -6583,        # Min PID position
-                angle_max   = 90,        # retract
-                angle_min   = -90,         # extend
-            ),
-            m2 = Rotation_Motor(  # pitch
-                encoder_max = 7656,         # Max PID position
-                encoder_min = -6722,           # Min PID position
-                angle_max   = 90,          # retract
-                angle_min   = -90,           # extend
-            )
-        )
-
-
-        # motor controller for forearm and bicep linear actuators
-        self.mcp2 = Motor_Controller(
-            rc = Roboclaw(self.mcp_comport_list[1], 115200),
-            address = 0x80,  
-            m1 = Linear_Actuator(  # bicep 
-                encoder_max = 2633,      # retract
-                encoder_min = 153,        # extend
-                angle_max   = 75,        # retract
-                angle_min   = 5,         # extend
-                length_max  = 34.2138,   # extend, centimeters
-                length_min  = 24.2062,   # retract, centimeters
-                # position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
-                position_on_arm = actuator_tri(16.7042, 18.2046, 8.75) # (cm, cm, deg)
-            ),
-            m2 = Linear_Actuator(  # forearm
-                encoder_max = 1893,         # retract
-                encoder_min = 20,           # extend
-                angle_max   = 140,          # retract
-                angle_min   = 75,           # extend
-                length_max  = 34.2138,      # extend, centimeters
-                length_min  = 25.4762,      # retract, centimeters
-                # position_on_arm = actuator_tri(3.0, 1.125, 12.50719421)  # inches
-                position_on_arm = actuator_tri(31.8965, 7.62, 5.14) # (cm, cm, deg)
-            )
-        )
-
-
-        # Motor controller for turret and grip
-        self.mcp3 = Motor_Controller(
-            rc = Roboclaw(self.mcp_comport_list[2], 115200),
-            address = 0x80,  
-            m1 = Gripper_Motor(  # Grip 
-                # Note: Grip motor does not have encoder
-            ),
-            m2 = Rotation_Motor(  # Turret
-                # Note: No limit needed for turret. Rotate via velocity rather than position.
-                angle_min = -120,
-                angle_max = 120,
-                encoder_max = 13993,
-                encoder_min = -11314
-             )
-        )
-
-
-        # Create list of motor controllers
-        self.MCP_List = [self.mcp1, self.mcp2, self.mcp3]
-
+        # Initialize motor controllers
+        # try:
+        self.initialize_motor_controllers()
+        
 
         # TODO - Eventually save previously known value for quad encoders. Do we need this for now?
         # Set encoder values to zero
@@ -152,8 +94,9 @@ class MinimalSubscriber(Node):
         print("Soft Stop Triggered")
 
         for mcp in self.MCP_List:
-            mcp.rc.ForwardM1(mcp.address, 0)
-            mcp.rc.ForwardM2(mcp.address, 0)
+            if mcp is not None:
+                mcp.rc.ForwardM1(mcp.address, 0)
+                mcp.rc.ForwardM2(mcp.address, 0)
 
 
     # called every time the subscriber receives a message
@@ -184,7 +127,12 @@ class MinimalSubscriber(Node):
     # Returns in order (0001, 0002, 0003)
     def get_motor_controllers(self):
 
-        device_list = subprocess.run(["./find_devpath.bash"], stdout=subprocess.PIPE, text=True).stdout.splitlines()
+        # Bash script is not moving during colcon build, and so am just pasting it here.
+        # TODO - Fix this
+
+        getter_script = "cd src/py_pubsub/py_pubsub/ && ./find_devpath.bash"
+
+        device_list = subprocess.run([getter_script], stdout=subprocess.PIPE, text=True, shell=True).stdout.splitlines()
 
         devpath_list = ["", "", ""]
 
@@ -203,6 +151,77 @@ class MinimalSubscriber(Node):
 
         return devpath_list
         
+
+    # Initialize motor controller objects
+    def initialize_motor_controllers(self):
+            
+            self.MCP_List = [None, None, None]
+
+            # motor controller for end-effector pitch and roll
+            self.mcp1 = Motor_Controller(
+                rc = Roboclaw(self.mcp_comport_list[0], 115200),
+                address = 0x80,  
+                m1 = Rotation_Motor(  # roll 
+                    encoder_max = 6580,      # Max PID position
+                    encoder_min = -6583,        # Min PID position
+                    angle_max   = 90,        # retract
+                    angle_min   = -90,         # extend
+                ),
+                m2 = Rotation_Motor(  # pitch
+                    encoder_max = 7656,         # Max PID position
+                    encoder_min = -6722,           # Min PID position
+                    angle_max   = 90,          # retract
+                    angle_min   = -90,           # extend
+                )
+            )
+
+
+            # motor controller for forearm and bicep linear actuators
+            self.mcp2 = Motor_Controller(
+                rc = Roboclaw(self.mcp_comport_list[1], 115200),
+                address = 0x80,  
+                m1 = Linear_Actuator(  # bicep 
+                    encoder_max = 2633,      # retract
+                    encoder_min = 153,        # extend
+                    angle_max   = 75,        # retract
+                    angle_min   = 5,         # extend
+                    length_max  = 34.2138,   # extend, centimeters
+                    length_min  = 24.2062,   # retract, centimeters
+                    # position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
+                    position_on_arm = actuator_tri(16.7042, 18.2046, 8.75) # (cm, cm, deg)
+                ),
+                m2 = Linear_Actuator(  # forearm
+                    encoder_max = 1893,         # retract
+                    encoder_min = 20,           # extend
+                    angle_max   = 140,          # retract
+                    angle_min   = 75,           # extend
+                    length_max  = 34.2138,      # extend, centimeters
+                    length_min  = 25.4762,      # retract, centimeters
+                    # position_on_arm = actuator_tri(3.0, 1.125, 12.50719421)  # inches
+                    position_on_arm = actuator_tri(31.8965, 7.62, 5.14) # (cm, cm, deg)
+                )
+            )
+
+
+            # Motor controller for turret and grip
+            self.mcp3 = Motor_Controller(
+                rc = Roboclaw(self.mcp_comport_list[2], 115200),
+                address = 0x80,  
+                m1 = Gripper_Motor(  # Grip 
+                    # Note: Grip motor does not have encoder
+                ),
+                m2 = Rotation_Motor(  # Turret
+                    # Note: No limit needed for turret. Rotate via velocity rather than position.
+                    angle_min = -120,
+                    angle_max = 120,
+                    encoder_max = 13993,
+                    encoder_min = -11314
+                )
+            )
+
+            # Create list of motor controllers
+            self.MCP_List = [self.mcp1, self.mcp2, self.mcp3]
+
 
 
 

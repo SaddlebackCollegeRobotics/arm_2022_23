@@ -4,7 +4,7 @@
   <name>py_pubsub</name>
   <version>0.0.0</version>
   <description>Examples of minimal publisher/subscriber using rclpy</description>
-  <maintainer email="supernovawarriors128@gmail.com">cameron</maintainer>
+  <maintainer email="">cameron</maintainer>
   <license>Apache License 2.0</license>
 
   <!-- Dependencies for node import statements -->
