@@ -8,15 +8,6 @@ import sys
 from .roboclaw_3 import Roboclaw
 from collections import namedtuple
 
-# Windows comport name - "COM8"
-# Linux comport name - "/dev/ttyACM1"
-# OSX comport name - "/dev/tty.usbmodem1301"
-
-# TODO - Need to find better way to do this.
-COMPORT_NAME_1 = "/dev/ttyACM0"
-COMPORT_NAME_2 = "/dev/ttyACM1"
-COMPORT_NAME_3 = "/dev/ttyACM2"
-
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
 
 # TODO - Eventually change to be put into MotorController declarations

@@ -21,7 +21,7 @@ from std_msgs.msg import Float32MultiArray
 from time import perf_counter
 from .arm_controller import *
 import signal
-import pyudev
+import subprocess
 
 
 class MinimalSubscriber(Node):
@@ -41,10 +41,8 @@ class MinimalSubscriber(Node):
         signal.signal(signal.SIGINT, self.signalHandler)
 
 
-        # MCP serial numbers MCP1, MCP2, MCP3
-        self.mcp_serial_list = ['', '', '']
-        self.get_motor_controllers()
-        self.mcp_comport_list = []
+        # Get motor controller device paths
+        self.mcp_comport_list = self.get_motor_controllers()
 
 
         # TODO - need to have these motors use PID position rather than encoder values? DO for mcp3 as well
@@ -182,21 +180,29 @@ class MinimalSubscriber(Node):
         # print()
 
 
+    # Get motor controller device paths using serial IDs
+    # Returns in order (0001, 0002, 0003)
     def get_motor_controllers(self):
 
-        # Create a context object to access the system's devices
-        context = pyudev.Context()
+        device_list = subprocess.run(["./find_devpath.bash"], stdout=subprocess.PIPE, text=True).stdout.splitlines()
 
-        # Find the device with the specified serial number
+        devpath_list = ["", "", ""]
 
-        for serial_number in self.mcp_serial_list:
-            device = context.list_devices(subsystem='tty', ID_SERIAL_SHORT=serial_number)
-            
-            if device:
-                self.mcp_comport_list.append(device[0].device_node)
-                print("Motor Controller Found")
-            else:
-                print("Motor Controller Not Found!")
+        # Add device paths to devpath list
+        for device in device_list:
+            splitStr = device.split(" - ")
+
+            if "ID0001" in splitStr[1]:
+                devpath_list[0] = splitStr[0]
+
+            elif "ID0002" in splitStr[1]:
+                devpath_list[1] = splitStr[0]
+
+            elif "ID0003" in splitStr[1]:
+                devpath_list[2] = splitStr[0]
+
+        return devpath_list
+        
 
 
 
