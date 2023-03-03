@@ -1,4 +1,6 @@
 from setuptools import setup
+import os
+from glob import glob
 
 package_name = 'py_pubsub'
 
@@ -10,11 +12,12 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name), glob('launch/py_pubsub/find_devpath.bash'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='cameron',
-    maintainer_email='supernovawarriors128@gmail.com',
+    maintainer_email='',
     description='Examples of minimal publisher/subscriber using rclpy',
     license='Apache License 2.0',
     tests_require=['pytest'],

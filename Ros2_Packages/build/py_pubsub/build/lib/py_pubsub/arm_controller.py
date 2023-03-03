@@ -8,19 +8,21 @@ import sys
 from .roboclaw_3 import Roboclaw
 from collections import namedtuple
 
-# Windows comport name - "COM8"
-# Linux comport name - "/dev/ttyACM1"
-# OSX comport name - "/dev/tty.usbmodem1301"
-
-# TODO - Need to find better way to do this.
-COMPORT_NAME_1 = "/dev/ttyACM0"
-COMPORT_NAME_2 = "/dev/ttyACM1"
-COMPORT_NAME_3 = "/dev/ttyACM2"
-
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
 
-SPEED = 850 #600
-ACCELERATION = 700 #200
+# TODO - Eventually change to be put into MotorController declarations
+
+SPEED = 850
+ACCELERATION = 700
+
+ROLL_SPEED = 3000
+ROLL_ACCEL = 2500
+
+PITCH_SPEED = 3000
+PITCH_ACCEL = 2500
+
+TURRET_SPEED = 850
+TURRET_ACCEL = 700
 
 # linear actuator 
 # d (inches) - distance from joint of arm to linear actuator
@@ -120,7 +122,7 @@ def set_arm_rotation(mcp: Motor_Controller, base_angle : float) -> None:
     #encoder_val = length_to_enc(mcp.m1, mcp.m1.angle_to_length(mcp.m1, base_angle))
 
     mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
-        ACCELERATION, SPEED, ACCELERATION, encoder_val, BUFFER_OR_INSTANT
+        TURRET_ACCEL, TURRET_SPEED, TURRET_ACCEL, encoder_val, BUFFER_OR_INSTANT
     )
 
 
@@ -131,15 +133,9 @@ def set_hand_rotation(mcp: Motor_Controller, hand_pitch: float, hand_roll: float
     #encoder_val_m1 = length_to_enc(mcp.m1, angle_to_length(mcp.m1, hand_pitch))
     #encoder_val_m2 = length_to_enc(mcp.m2, angle_to_length(mcp.m2, hand_roll))
 
-    # mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m1, 
-    #     ACCELERATION, SPEED, ACCELERATION, encoder_val_m2, 
-    #     BUFFER_OR_INSTANT 
-    # )
-
     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-        ACCELERATION, 3000, ACCELERATION, encoder_val_m1, 
-        ACCELERATION, 3000, ACCELERATION, encoder_val_m2, 
+        ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
+        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
         BUFFER_OR_INSTANT 
     )
 
@@ -152,100 +148,5 @@ def open_close_hand(mcp: Motor_Controller, move_velocity):
     else:
         # mcp.rc.SpeedAccelM1(mcp.address, 20, int(move_velocity))
         mcp.rc.SpeedAccelM1(mcp.address, 20, int(move_velocity))
-    
-
-#NOTE for testing of angle_to_length function
-def main():
-    # motor controller with hand pitch and roll 
-    mcp1 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME_1, 115200),  #TODO figure out correct comport
-        address = 0x0,  #TODO set val
-        m1 = Rotation_Motor(  # pitch motor
-            encoder_max = 0,  #TODO set value
-            encoder_min = 0,  #TODO set value
-            angle_min = -90,  
-            angle_max = 90   
-        ),
-        m2 = Rotation_Motor(  # roll motor
-            encoder_max = 0,  #TODO set value
-            encoder_min = 0,  #TODO set value
-            angle_min = -90,  
-            angle_max = 90 
-        )
-    )
-
-    # motor controller with forearm and bicep linear
-    # motor controller with forearm and bicep linear
-    mcp2 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME_1, 115200),
-        address = 0x80,  
-        m1 = Linear_Actuator(  # bicep 
-            encoder_max = 2633,      # retract
-            encoder_min = 25,        # extend
-            angle_max   = 75,        # retract
-            angle_min   = 5,         # extend
-            length_max  = 9.53,      # retract, inches
-            length_min  = 13.47,     # extend, inches
-            position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
-        ),
-        m2 = Linear_Actuator(  # forearm
-            encoder_max = 1893,         # retract
-            encoder_min = 20,           # extend
-            angle_max   = 140,          # retract
-            angle_min   = 75,           # extend
-            length_max  = 10.03927072,  # retract, inches
-            length_min  = 13.47,        # extend, inches
-            position_on_arm = actuator_pos(3.0, 1.125, 12.50719421)  # inches
-        )
-    )
-
-    # motor controller with hand pitch and roll motors 
-    mcp3 = Motor_Controller(
-        rc = Roboclaw(COMPORT_NAME_1, 115200),  #TODO figure out correct comport
-        address = 0x0,  #TODO set val
-        m1 = Rotation_Motor(  # pitch motor
-            encoder_max = 0,  #TODO set value
-            encoder_min = 0,  #TODO set value
-            angle_min = -180,  
-            angle_max = 180
-        ),
-        m2 = Gripper_Motor(  # roll motor
-            encoder_max = 0,  #TODO set value
-            encoder_min = 0   #TODO set value
-        )
-    )
-
-    # angle1 = float(sys.argv[1]) if len(sys.argv) > 1 else 45
-    # angle2 = float(sys.argv[2]) if len(sys.argv) > 2 else 45
-
-    # length1 = angle_to_length(mcp2.m1, angle1)
-    # length2 = angle_to_length(mcp2.m2, angle2)
-
-    # # encoder1 = length_to_enc(mcp2.m1, length1)
-    # # encoder2 = length_to_enc(mcp2.m2, length2)
-
-    # encoder1 = angle_to_enc(mcp2.m1, angle1)
-    # encoder2 = angle_to_enc(mcp2.m2, angle2)
-
-    encoder1 = int(sys.argv[1]) if len(sys.argv) > 1 else 100
-    encoder2 = int(sys.argv[2]) if len(sys.argv) > 2 else 100
-
-    # print(f"angles: {angle1}  {angle2}")
-    # print(f"lengths: {length1}  {length2}")
-    print(f"encoders: {encoder1}  {encoder2}")
-
-    mcp2.rc.SpeedAccelDeccelPositionM1M2(mcp2.address, 
-        ACCELERATION, SPEED, ACCELERATION, encoder1, 
-        ACCELERATION, SPEED, ACCELERATION, encoder2, 
-        BUFFER_OR_INSTANT 
-    )
-
-    while True:
-        mcp2.print_encoders()
-
-
-if __name__=='__main__':
-    main()
-    
 
 # rm -rf build install log && colcon build && source ./install/setup.bash && ros2 run py_pubsub listener
