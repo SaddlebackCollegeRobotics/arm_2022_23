@@ -15,7 +15,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='cameron',
-    maintainer_email='',
+    maintainer_email='bruh@bruh.com',
     description='Examples of minimal publisher/subscriber using rclpy',
     license='Apache License 2.0',
     tests_require=['pytest'],
