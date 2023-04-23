@@ -22,6 +22,7 @@ from time import perf_counter
 from .arm_controller import *
 import signal
 import subprocess
+import os
 
 
 class MinimalSubscriber(Node):
@@ -130,7 +131,7 @@ class MinimalSubscriber(Node):
         # Bash script is not moving during colcon build, and so am just pasting it here.
         # TODO - Fix this
 
-        getter_script = "cd src/py_pubsub/py_pubsub/ && ./find_devpath.bash"
+        getter_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../share/py_pubsub/find_devpath.bash')
 
         device_list = subprocess.run([getter_script], stdout=subprocess.PIPE, text=True, shell=True).stdout.splitlines()
 
