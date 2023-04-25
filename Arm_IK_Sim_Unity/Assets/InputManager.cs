@@ -7,23 +7,23 @@ public class InputManager : MonoBehaviour
 
     private PlayerInput m_playerInput;
 
-    private InputAction m_armPlanarMovementAction;
-    public InputAction m_safetyAction;
+    [HideInInspector] private InputAction m_armPlanarMovementAction;
+    [HideInInspector] public InputAction m_safetyAction;
 
-    public InputAction m_raiseArmAction;
-    public InputAction m_lowerArmAction;
-    
-    public InputAction m_speedTrimUpAction;
-    public InputAction m_speedTrimDownAction;
-    
-    public InputAction m_gripPitchAction;
-    public InputAction m_gripRollAction;
-    
-    public InputAction m_gripOpenAction;
-    public InputAction m_gripCloseAction;
-    
-    public InputAction m_pokerOutAction;
-    public InputAction m_pokerInAction;
+    [HideInInspector] public InputAction m_raiseArmAction;
+    [HideInInspector] public InputAction m_lowerArmAction;
+
+    [HideInInspector] public InputAction m_speedTrimUpAction;
+    [HideInInspector] public InputAction m_speedTrimDownAction;
+
+    [HideInInspector] public InputAction m_gripPitchAction;
+    [HideInInspector] public InputAction m_gripRollAction;
+
+    [HideInInspector] public InputAction m_gripOpenAction;
+    [HideInInspector] public InputAction m_gripCloseAction;
+
+    [HideInInspector] public InputAction m_pokerOutAction;
+    [HideInInspector] public InputAction m_pokerInAction;
 
     private Vector2 m_armPlanarMovement;
 

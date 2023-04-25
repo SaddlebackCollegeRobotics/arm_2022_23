@@ -8,6 +8,10 @@ public class IK_Controller : MonoBehaviour
     [SerializeField] private float turretRotationSpeed = 25;
     [SerializeField] private float armMovementSpeed = 5;
     [SerializeField] private float armMovementOtherSpeed = 3;
+    [SerializeField] private bool enforceLimits = true;
+    [SerializeField] private Vector2 maxTargetBounds;
+    [SerializeField] private Vector2 minTargetBounds;
+    [SerializeField] private Vector2 rotationLimits;
 
     [SerializeField] private Transform turretJoint;
     //[SerializeField] private Transform targetJoint;
@@ -44,6 +48,35 @@ public class IK_Controller : MonoBehaviour
         {
             target.localPosition += new Vector3(armMovementOtherSpeed * Time.deltaTime, 0);
         }
+
+        // Enforce bounds -------------------------------
+
+        if (enforceLimits)
+        {
+            Vector3 localPos = target.localPosition;
+
+            if (localPos.x > maxTargetBounds.x)
+            {
+                localPos.x = maxTargetBounds.x;
+            }
+            else if (localPos.x < minTargetBounds.x)
+            {
+                localPos.x = minTargetBounds.x;
+            }
+
+            if (localPos.y > maxTargetBounds.y)
+            {
+                localPos.y = maxTargetBounds.y;
+            }
+            else if (localPos.y < minTargetBounds.y)
+            {
+                localPos.y = minTargetBounds.y;
+            }
+
+            target.localPosition = localPos;
+        }
+        
+
     }
 
 }

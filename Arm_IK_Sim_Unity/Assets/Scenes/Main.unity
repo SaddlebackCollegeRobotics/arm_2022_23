@@ -370,6 +370,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turretRotationSpeed: 25
   armMovementSpeed: 5
+  armMovementOtherSpeed: 3
+  enforceLimits: 0
+  maxTargetBounds: {x: -7, y: 10.8}
+  minTargetBounds: {x: -13.6, y: -4.67}
+  rotationLimits: {x: -225, y: 225}
   turretJoint: {fileID: 1779791557}
   target: {fileID: 1072998760}
   elbowJoint: {fileID: 708571143}
