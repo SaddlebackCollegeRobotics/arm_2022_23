@@ -3,111 +3,33 @@
 using UnityEngine;
 
 
-public class IK_Target : DragableObject
+public class IK_Target : MonoBehaviour
 {
-    [SerializeField] private Collider2D targetBounds; // Position limiting bounds of the target.
-    [SerializeField] private float smoothTime = 0.5f; // Smooths target movement while using axis control.
-    [SerializeField] private float speedFactor = 1.5f; // A factor to control target speed while using axis control.
-    
-    private bool moveWithGamepad = false; // Should the target move using gamepad / keyboard axis.
+    InputManager inputManager;
 
-    private float horizontal; // Horizontal controls axis.
-    private float vertical; // Vertical controls axis.
-    private float left_trigger; // Left trigger axis
-    private Vector3 currentVelocity = Vector3.zero; // Used in the smoothing calculation.
-
-    bool wasHoldingSafetyTrigger = false; // Flag for if the left trigger was held in the last frame.
-
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
+        inputManager = InputManager.GetInstance();
     }
 
-
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        if (moveWithGamepad)
-        {
-            MoveUsingAxis();
-        }
-
-        LimitBounds();
     }
 
-
-    protected override void OnMousePressed(){}
-
-
-    protected override void WhileMousePressed()
+    private void Update()
     {
-        Vector3 mouseWorldPos = GetMouseWorldPos();
-        Vector3 mouseOffset = GetInitialMouseOffset();
-        transform.position = new Vector3(mouseWorldPos.x + mouseOffset.x, mouseWorldPos.y + mouseOffset.y, transform.position.z);
-    }
+        Vector2 movement = inputManager.GetArmPlanarMovement();
 
+        transform.position += new Vector3(movement.x, 0, movement.y).normalized * 2 * Time.deltaTime;
 
-    protected override void OnMouseReleased(){}
-
-
-    // Limit where the target can move.
-    private void LimitBounds()
-    {
-        Vector3 currPos = transform.position;
-        
-        if (currPos.x > targetBounds.bounds.max.x)
+        if (inputManager.m_raiseArmAction.IsPressed())
         {
-            currPos.x = targetBounds.bounds.max.x;
+            transform.position += Vector3.up * 2 * Time.deltaTime;
         }
-        else if (currPos.x < targetBounds.bounds.min.x)
+        else if (inputManager.m_lowerArmAction.IsPressed())
         {
-            currPos.x = targetBounds.bounds.min.x;
+            transform.position += Vector3.down * 2 * Time.deltaTime;
         }
-
-        if (currPos.y > targetBounds.bounds.max.y)
-        {
-            currPos.y = targetBounds.bounds.max.y;
-        }
-        else if (currPos.y < targetBounds.bounds.min.y)
-        {
-            currPos.y = targetBounds.bounds.min.y;
-        }
-
-        transform.position = currPos;
-    }
-
-
-    // Move the target using gamepad / keyboard axis.
-    private void MoveUsingAxis()
-    {
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = Input.GetAxis("Vertical");
-        
-        left_trigger = Input.GetAxis("Left_Trigger");
-       
-
-        if (left_trigger < 0 || Input.GetKey(KeyCode.LeftShift))
-        {
-            wasHoldingSafetyTrigger = true;
-            transform.position = Vector3.SmoothDamp(transform.position, transform.position + new Vector3(horizontal, vertical, 0) * speedFactor * Time.deltaTime, ref currentVelocity, smoothTime);
-        }
-        else if (wasHoldingSafetyTrigger)
-        {
-            wasHoldingSafetyTrigger = false;
-            currentVelocity = Vector3.zero;
-        }
-    }
-
-    public void SetMoveWithGamepad(bool b)
-    {
-        moveWithGamepad = b;
-    }
-
-    public void SetSpeedFactor(float speed)
-    {
-        speedFactor = speed;
     }
 
 }
