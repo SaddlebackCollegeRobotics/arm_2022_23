@@ -7,11 +7,11 @@ public class InputManager : MonoBehaviour
 
     private PlayerInput m_playerInput;
 
-    [HideInInspector] private InputAction m_armPlanarMovementAction;
+    [HideInInspector] public InputAction m_armPlanarMovementAction;
     [HideInInspector] public InputAction m_safetyAction;
 
-    [HideInInspector] public InputAction m_raiseArmAction;
-    [HideInInspector] public InputAction m_lowerArmAction;
+    [HideInInspector] public InputAction m_armForwardAction;
+    [HideInInspector] public InputAction m_armBackwardAction;
 
     [HideInInspector] public InputAction m_speedTrimUpAction;
     [HideInInspector] public InputAction m_speedTrimDownAction;
@@ -25,13 +25,10 @@ public class InputManager : MonoBehaviour
     [HideInInspector] public InputAction m_pokerOutAction;
     [HideInInspector] public InputAction m_pokerInAction;
 
-    private Vector2 m_armPlanarMovement;
-
     private void Awake()
     {   
         instance = this;
 
-        // Set up player input
         m_playerInput = GetComponent<PlayerInput>();
 
         // Instantiate input actions ---------------------------------------------------------
@@ -39,8 +36,8 @@ public class InputManager : MonoBehaviour
         m_armPlanarMovementAction =  m_playerInput.actions.FindAction("ArmPlanarMovement");
         m_safetyAction = m_playerInput.actions.FindAction("Safety");
 
-        m_raiseArmAction = m_playerInput.actions.FindAction("RaiseArm");
-        m_lowerArmAction = m_playerInput.actions.FindAction("LowerArm");
+        m_armForwardAction = m_playerInput.actions.FindAction("ArmForward");
+        m_armBackwardAction = m_playerInput.actions.FindAction("ArmBackward");
 
         m_speedTrimUpAction = m_playerInput.actions.FindAction("SpeedTrimUp");
         m_speedTrimDownAction = m_playerInput.actions.FindAction("SpeedTrimDown");
@@ -58,16 +55,6 @@ public class InputManager : MonoBehaviour
 
         /*m_aimLockAction.started += OnAimLock;
         m_aimLockAction.canceled += OnAimLock;*/
-    }
-
-    private void Update()
-    {
-        m_armPlanarMovement = m_armPlanarMovementAction.ReadValue<Vector2>();
-    }
-
-    public Vector2 GetArmPlanarMovement()
-    {
-        return m_armPlanarMovement;
     }
 
     public static InputManager GetInstance()

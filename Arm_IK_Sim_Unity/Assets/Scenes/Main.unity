@@ -368,16 +368,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd192800a61d3241973477e9d8faa8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turretRotationSpeed: 25
-  armMovementSpeed: 5
-  armMovementOtherSpeed: 3
-  enforceLimits: 0
-  maxTargetBounds: {x: -7, y: 10.8}
-  minTargetBounds: {x: -13.6, y: -4.67}
-  rotationLimits: {x: -225, y: 225}
-  turretJoint: {fileID: 1779791557}
-  target: {fileID: 1072998760}
-  elbowJoint: {fileID: 708571143}
+  m_turretRotationSpeed: 25
+  m_armMovementSpeed: 5
+  m_armMovementOtherSpeed: 3
+  m_IKTargetLimits: 1
+  m_TurretRotLimits: 1
+  m_turretJoint: {fileID: 1779791557}
+  m_IKTarget: {fileID: 1072998760}
 --- !u!1 &23334050
 GameObject:
   m_ObjectHideFlags: 0
@@ -9181,7 +9178,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1779791557}
-  - component: {fileID: 1779791558}
   m_Layer: 0
   m_Name: Turret Joint
   m_TagString: Untagged
@@ -9207,24 +9203,6 @@ Transform:
   m_Father: {fileID: 1713048823}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1779791558
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1779791556}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 484718f2c4ab849829491782b508958a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  axis: {x: 0, y: 1, z: 0}
-  defaultLocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  useLimits: 1
-  min: -135
-  max: 135
-  zeroAxisDisplayOffset: 0
 --- !u!1 &1828789441
 GameObject:
   m_ObjectHideFlags: 0
@@ -10657,6 +10635,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed08f30014f21c743bea80c99ec851fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_armPlanarMovementAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
   m_safetyAction:
     m_Name: Safety
     m_Type: 0
@@ -10666,20 +10653,20 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_raiseArmAction:
-    m_Name: Raise Arm
+  m_armForwardAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: c1fb86ed-1431-4f54-ba53-e49cf0f9ca45
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_lowerArmAction:
-    m_Name: Lower Arm
+  m_armBackwardAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: a13e49ab-a6d1-4513-bc95-199c2ed27399
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []

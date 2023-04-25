@@ -5,77 +5,89 @@ using UnityEngine;
 
 public class IK_Controller : MonoBehaviour
 {
-    [SerializeField] private float turretRotationSpeed = 25;
-    [SerializeField] private float armMovementSpeed = 5;
-    [SerializeField] private float armMovementOtherSpeed = 3;
-    [SerializeField] private bool enforceLimits = true;
-    [SerializeField] private Vector2 maxTargetBounds;
-    [SerializeField] private Vector2 minTargetBounds;
-    [SerializeField] private Vector2 rotationLimits;
+    [Header("Speed Adjustment")]
+    [SerializeField] private float m_turretRotationSpeed = 25;
+    [SerializeField] private float m_armMovementSpeed = 5;
+    [SerializeField] private float m_armMovementOtherSpeed = 3;
 
-    [SerializeField] private Transform turretJoint;
-    //[SerializeField] private Transform targetJoint;
-    [SerializeField] private Transform target;
-    [SerializeField] private Transform elbowJoint;
+    [Header("Limits")]
+    [SerializeField] private bool m_IKTargetLimits = true;
+    [SerializeField] private bool m_TurretRotLimits = true;
 
-    InputManager inputManager;
+    [SerializeField]
+    private float[,] m_IKLimits = {
+
+        {-13.8f, -7f},   // IK Target  = (Min X, Max X)   
+        {-4.67f, 10.8f}, // IK Target  = (Min Y, Max Y)
+        {-225f, 225f}    // Turret Rot = (Min Angle, Max Angle)
+    
+    };
+
+    [Header("IKJoints")]
+    [SerializeField] private Transform m_turretJoint;
+    [SerializeField] private Transform m_IKTarget;
+
+    private InputManager inputManager;
+
 
     private void Start()
     {
         inputManager = InputManager.GetInstance();
     }
 
-    private void FixedUpdate()
-    {
-    }
-
     private void Update()
     {
-        Vector2 movement = inputManager.GetArmPlanarMovement();
+        Vector2 movement = inputManager.m_armPlanarMovementAction.ReadValue<Vector2>();
 
-        target.localPosition += new Vector3(0, movement.y * armMovementSpeed * Time.deltaTime);
+        // Move IK target up and down
+        m_IKTarget.localPosition += new Vector3(0, movement.y * m_armMovementSpeed * Time.deltaTime);
 
-        turretJoint.localRotation = Quaternion.Euler(turretJoint.localEulerAngles.x, turretJoint.localEulerAngles.y + (turretRotationSpeed * Time.deltaTime * movement.x), turretJoint.localEulerAngles.z);
-        //targetJoint.localRotation = Quaternion.Euler(targetJoint.localEulerAngles.x, targetJoint.localEulerAngles.y, targetJoint.localEulerAngles.z + -(turretRotationSpeed * Time.deltaTime * movement.y));
+        // Rotate turret joint
+        m_turretJoint.localRotation = Quaternion.Euler(m_turretJoint.localEulerAngles.x, m_turretJoint.localEulerAngles.y + (m_turretRotationSpeed * Time.deltaTime * movement.x), m_turretJoint.localEulerAngles.z);
 
-        //Vector2 elbowToTarget = (Vector2)(target.position - elbowJoint.position).normalized;
-
-        if (inputManager.m_raiseArmAction.IsPressed())
+        // Move IK target forward or backward.
+        if (inputManager.m_armForwardAction.IsPressed())
         {
-            target.localPosition += new Vector3(-armMovementOtherSpeed * Time.deltaTime, 0);
+            m_IKTarget.localPosition += new Vector3(-m_armMovementOtherSpeed * Time.deltaTime, 0);
         }
-        else if (inputManager.m_lowerArmAction.IsPressed())
+        else if (inputManager.m_armBackwardAction.IsPressed())
         {
-            target.localPosition += new Vector3(armMovementOtherSpeed * Time.deltaTime, 0);
+            m_IKTarget.localPosition += new Vector3(m_armMovementOtherSpeed * Time.deltaTime, 0);
         }
 
-        // Enforce bounds -------------------------------
+        // Enforce IK target bounds -------------------------------
 
-        if (enforceLimits)
+        if (m_IKTargetLimits)
         {
-            Vector3 localPos = target.localPosition;
+            Vector3 localPos = m_IKTarget.localPosition;
 
-            if (localPos.x > maxTargetBounds.x)
+            if (localPos.x > m_IKLimits[0, 1])
             {
-                localPos.x = maxTargetBounds.x;
+                localPos.x = m_IKLimits[0, 1];
             }
-            else if (localPos.x < minTargetBounds.x)
+            else if (localPos.x < m_IKLimits[0, 0])
             {
-                localPos.x = minTargetBounds.x;
-            }
-
-            if (localPos.y > maxTargetBounds.y)
-            {
-                localPos.y = maxTargetBounds.y;
-            }
-            else if (localPos.y < minTargetBounds.y)
-            {
-                localPos.y = minTargetBounds.y;
+                localPos.x = m_IKLimits[0, 0];
             }
 
-            target.localPosition = localPos;
+            if (localPos.y > m_IKLimits[1, 1])
+            {
+                localPos.y = m_IKLimits[1, 1];
+            }
+            else if (localPos.y < m_IKLimits[1, 0])
+            {
+                localPos.y = m_IKLimits[1, 0];
+            }
+
+            m_IKTarget.localPosition = localPos;
         }
-        
+
+        // Enforce turret rotation limits ------------------------------
+
+        if (m_TurretRotLimits)
+        {
+            // TODO
+        }
 
     }
 

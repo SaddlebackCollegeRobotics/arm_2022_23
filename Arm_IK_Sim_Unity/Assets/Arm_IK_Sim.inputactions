@@ -24,7 +24,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "RaiseArm",
+                    "name": "ArmForward",
                     "type": "Button",
                     "id": "0a1c6141-ced3-4064-834b-3f597407d1bb",
                     "expectedControlType": "Button",
@@ -33,7 +33,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "LowerArm",
+                    "name": "ArmBackward",
                     "type": "Button",
                     "id": "a0c40aab-c7cc-438d-988d-ae2dacd8bbe4",
                     "expectedControlType": "Button",
@@ -173,7 +173,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "LowerArm",
+                    "action": "ArmBackward",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -184,7 +184,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "RaiseArm",
+                    "action": "ArmForward",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
