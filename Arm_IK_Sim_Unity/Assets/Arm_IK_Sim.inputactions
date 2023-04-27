@@ -6,7 +6,16 @@
             "id": "100da4b4-23b7-472d-bb19-0601beb89915",
             "actions": [
                 {
-                    "name": "ArmPlanarMovement",
+                    "name": "LeftStick",
+                    "type": "Value",
+                    "id": "b7efad2d-417d-4e5c-896d-0fdbd8172f48",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightStick",
                     "type": "Value",
                     "id": "1d266ac8-9c44-4726-a43a-78af9c754f12",
                     "expectedControlType": "Vector2",
@@ -140,7 +149,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "ArmPlanarMovement",
+                    "action": "RightStick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,7 +277,7 @@
                 {
                     "name": "",
                     "id": "a5a7ffc2-39da-4868-bc03-362b47d063ae",
-                    "path": "<Gamepad>/dpad/down",
+                    "path": "<Gamepad>/dpad/up",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -279,7 +288,7 @@
                 {
                     "name": "",
                     "id": "1102206a-e93f-408c-8216-098efcf839ce",
-                    "path": "<Gamepad>/dpad/up",
+                    "path": "<Gamepad>/dpad/down",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -295,6 +304,17 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "GripRollRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eb9460b9-d15c-4cff-87e8-8680a1d91014",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "LeftStick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

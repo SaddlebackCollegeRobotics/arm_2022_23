@@ -9,6 +9,7 @@ public class IK_Controller : MonoBehaviour
     [SerializeField] private float turretRotationSpeed = 25;
     [SerializeField] private float armMovementSpeed = 5;
     [SerializeField] private float armMovementOtherSpeed = 3;
+    [SerializeField] private float gripPitchSpeed = 20;
 
     [Header("Limits")]
     [SerializeField] private bool IKTargetLimits = true;
@@ -27,6 +28,14 @@ public class IK_Controller : MonoBehaviour
     [SerializeField] private Transform turretJoint;
     [SerializeField] private Transform IKTarget;
 
+    [SerializeField] private Transform gripPitchJoint;
+    [SerializeField] private Transform gripEnd;
+
+    [Header("Gripper")]
+    [SerializeField] private float desiredGripPitchAngle;
+    [SerializeField] private bool useGripIK = true;
+    
+
     private InputManager inputManager;
 
 
@@ -35,17 +44,27 @@ public class IK_Controller : MonoBehaviour
         inputManager = InputManager.GetInstance();
     }
 
-    private void Update()
+    private void Update() // TODO - combine rotation setters for turretJoint localRotation
     {
-        Vector2 movement = inputManager.armPlanarMovementAction.ReadValue<Vector2>();
+        Vector2 right_stick = inputManager.rightStickAction.ReadValue<Vector2>();
 
-        // Move IK target up and down
-        IKTarget.localPosition += new Vector3(0, movement.y * armMovementSpeed * Time.deltaTime);
+        // Move IK target Up and Down
+        IKTarget.localPosition += new Vector3(0, right_stick.y * armMovementSpeed * Time.deltaTime);
 
-        // Rotate turret joint
-        turretJoint.localRotation = Quaternion.Euler(turretJoint.localEulerAngles.x, turretJoint.localEulerAngles.y + (turretRotationSpeed * Time.deltaTime * movement.x), turretJoint.localEulerAngles.z);
+        // Rotate turret joint using right_stick
+        turretJoint.localRotation = Quaternion.Euler(turretJoint.localEulerAngles.x, turretJoint.localEulerAngles.y + (turretRotationSpeed * Time.deltaTime * right_stick.x), turretJoint.localEulerAngles.z);
 
-        // Move IK target forward or backward.
+        Vector2 left_stick = inputManager.leftStickAction.ReadValue<Vector2>();
+
+        // Move IK target Forward and Backward.
+        IKTarget.localPosition += new Vector3(left_stick.y * -armMovementSpeed * Time.deltaTime, 0);
+
+        // Rotate turret joint using left_stick
+
+        turretJoint.localRotation = Quaternion.Euler(turretJoint.localEulerAngles.x, turretJoint.localEulerAngles.y + (turretRotationSpeed * Time.deltaTime * left_stick.x), turretJoint.localEulerAngles.z);
+
+        // TODO - Need to add this back in as reading from left stick.
+        /*// Move IK target forward or backward.
         if (inputManager.armForwardAction.IsPressed())
         {
             IKTarget.localPosition += new Vector3(-armMovementOtherSpeed * Time.deltaTime, 0);
@@ -53,7 +72,39 @@ public class IK_Controller : MonoBehaviour
         else if (inputManager.armBackwardAction.IsPressed())
         {
             IKTarget.localPosition += new Vector3(armMovementOtherSpeed * Time.deltaTime, 0);
+        }*/
+
+        // Handle IK for gripper pitch ------------------------------------------------------------
+
+        if (useGripIK)
+        {
+            gripPitchJoint.rotation = Quaternion.Euler(gripPitchJoint.eulerAngles.x, gripPitchJoint.eulerAngles.y, desiredGripPitchAngle);
+            gripPitchJoint.localEulerAngles = new Vector3(0, 0, gripPitchJoint.localEulerAngles.z);
         }
+
+        if (inputManager.gripPitchUpAction.IsPressed())
+        {
+            desiredGripPitchAngle += -gripPitchSpeed * Time.deltaTime;
+        }
+        else if (inputManager.gripPitchDownAction.IsPressed())
+        {
+            desiredGripPitchAngle += gripPitchSpeed * Time.deltaTime;
+        }
+
+        // Move IK target forward or backward along gripper direction -----------------------------
+
+        Vector3 gripperDirection = (gripEnd.position - gripPitchJoint.position).normalized;
+        
+        if (inputManager.armForwardAction.IsPressed())
+        {
+            IKTarget.position += gripperDirection * armMovementOtherSpeed * Time.deltaTime;
+        }
+        else if (inputManager.armBackwardAction.IsPressed())
+        {
+            IKTarget.position += -gripperDirection * armMovementOtherSpeed * Time.deltaTime;
+        }
+
+        IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);
 
         // Enforce IK target bounds -------------------------------
 

@@ -368,13 +368,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd192800a61d3241973477e9d8faa8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_turretRotationSpeed: 25
-  m_armMovementSpeed: 5
-  m_armMovementOtherSpeed: 3
-  m_IKTargetLimits: 1
-  m_TurretRotLimits: 1
-  m_turretJoint: {fileID: 1779791557}
-  m_IKTarget: {fileID: 1072998760}
+  turretRotationSpeed: 25
+  armMovementSpeed: 5
+  armMovementOtherSpeed: 3
+  gripPitchSpeed: 20
+  IKTargetLimits: 1
+  turretRotLimits: 1
+  turretJoint: {fileID: 1779791557}
+  IKTarget: {fileID: 1072998760}
+  gripPitchJoint: {fileID: 1920084647}
+  gripEnd: {fileID: 369128613}
+  desiredGripPitchAngle: 0
+  useGripIK: 0
 --- !u!1 &23334050
 GameObject:
   m_ObjectHideFlags: 0
@@ -1868,7 +1873,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &380086073
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10635,7 +10640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed08f30014f21c743bea80c99ec851fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_armPlanarMovementAction:
+  leftStickAction:
     m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
@@ -10644,16 +10649,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_safetyAction:
-    m_Name: Safety
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 565f5f78-3e25-4b8a-98c4-e4433ad23cd6
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings: []
-    m_Flags: 0
-  m_armForwardAction:
+  rightStickAction:
     m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
@@ -10662,7 +10658,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_armBackwardAction:
+  safetyAction:
     m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
@@ -10671,74 +10667,110 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_speedTrimUpAction:
-    m_Name: Speed Trim Up
+  armForwardAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: 8bfa1eff-4bc3-4b84-b33b-675cbc017bce
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_speedTrimDownAction:
-    m_Name: Speed Trim Down
+  armBackwardAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: a69975cf-1e26-4334-8cf8-bc908caaa244
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_gripPitchAction:
-    m_Name: Grip Pitch
+  speedTrimUpAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: f5704eaa-94e9-4b24-9034-4f7b66056e37
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_gripRollAction:
-    m_Name: Grip Roll
+  speedTrimDownAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: d100151d-63de-4109-9e62-45e6ed4040e5
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_gripOpenAction:
-    m_Name: Grip Open
+  gripPitchUpAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: 8639d6be-5b2c-4823-b312-c90488e693e7
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_gripCloseAction:
-    m_Name: Grip Close
+  gripPitchDownAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: 4c9ce23b-aea1-426b-ae2d-c015d9f8d78b
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_pokerOutAction:
-    m_Name: Poker Out
+  gripRollLeftAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: 34cae0ba-d386-4f2b-ac77-fcecaca17280
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
-  m_pokerInAction:
-    m_Name: Poker In
+  gripRollRightAction:
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: 496281d2-1eea-4efa-8188-330f294e9c14
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  gripOpenAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  gripCloseAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  pokerOutAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  pokerInAction:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
@@ -10852,7 +10884,7 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9a988dec-8a92-4eed-b73d-28584d030baa
     m_ActionName: UI/TrackedDeviceOrientation
-  m_NeverAutoSwitchControlSchemes: 0
+  m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1

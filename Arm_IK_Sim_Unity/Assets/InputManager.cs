@@ -7,7 +7,9 @@ public class InputManager : MonoBehaviour
 
     private PlayerInput playerInput;
 
-    [HideInInspector] public InputAction armPlanarMovementAction;
+    [HideInInspector] public InputAction leftStickAction;
+    [HideInInspector] public InputAction rightStickAction;
+
     [HideInInspector] public InputAction safetyAction;
 
     [HideInInspector] public InputAction armForwardAction;
@@ -16,8 +18,12 @@ public class InputManager : MonoBehaviour
     [HideInInspector] public InputAction speedTrimUpAction;
     [HideInInspector] public InputAction speedTrimDownAction;
 
-    [HideInInspector] public InputAction gripPitchAction;
-    [HideInInspector] public InputAction gripRollAction;
+    [HideInInspector] public InputAction gripPitchUpAction;
+    [HideInInspector] public InputAction gripPitchDownAction;
+
+
+    [HideInInspector] public InputAction gripRollLeftAction;
+    [HideInInspector] public InputAction gripRollRightAction;
 
     [HideInInspector] public InputAction gripOpenAction;
     [HideInInspector] public InputAction gripCloseAction;
@@ -33,7 +39,9 @@ public class InputManager : MonoBehaviour
 
         // Instantiate input actions ---------------------------------------------------------
 
-        armPlanarMovementAction =  playerInput.actions.FindAction("ArmPlanarMovement");
+        leftStickAction =  playerInput.actions.FindAction("LeftStick");
+        rightStickAction =  playerInput.actions.FindAction("RightStick");
+
         safetyAction = playerInput.actions.FindAction("Safety");
 
         armForwardAction = playerInput.actions.FindAction("ArmForward");
@@ -42,8 +50,11 @@ public class InputManager : MonoBehaviour
         speedTrimUpAction = playerInput.actions.FindAction("SpeedTrimUp");
         speedTrimDownAction = playerInput.actions.FindAction("SpeedTrimDown");
 
-        gripPitchAction = playerInput.actions.FindAction("GripPitch");
-        gripRollAction = playerInput.actions.FindAction("GripRoll");
+        gripPitchUpAction = playerInput.actions.FindAction("GripPitchUp");
+        gripPitchDownAction = playerInput.actions.FindAction("GripPitchDown");
+
+        gripRollLeftAction = playerInput.actions.FindAction("GripRollLeft");
+        gripRollRightAction = playerInput.actions.FindAction("GripRollRight");
 
         gripOpenAction = playerInput.actions.FindAction("GripOpen");
         gripCloseAction = playerInput.actions.FindAction("GripClose");
