@@ -5,7 +5,7 @@ import sys
 # PATH_TO_ROBOCLAW = "../../lib/roboclaw_python"
 # sys.path.append(PATH_TO_ROBOCLAW)
 
-from .roboclaw_3 import Roboclaw
+from roboclaw_3 import Roboclaw
 from collections import namedtuple
 
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
