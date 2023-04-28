@@ -1,1 +1,7 @@
 /.vscode
+
+Builds/
+Assets/
+Packages/
+ProjectSettings/
+Arm_IK_Sim_Unity/
