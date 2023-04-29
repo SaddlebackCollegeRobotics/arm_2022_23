@@ -33,8 +33,8 @@ public class DataPublisher : MonoBehaviour
             msg = new std_msgs.msg.Float32MultiArray();
             msg.Data = new float[6];
 
-            ros2Node = ros2Unity.CreateNode("ROS2UnityListenerNode");
-            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/Arm_Controls_Sim"); 
+            ros2Node = ros2Unity.CreateNode("ROS2UnityNode");
+            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/arm/control_instruction"); 
         }
         
     }
@@ -42,27 +42,30 @@ public class DataPublisher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Bicep actuator length.
-        msg.Data[0] = (actuatorJointList[0].position - actuatorJointList[1].position).magnitude;
+        if (ros2Unity.Ok())
+        {
+            // Bicep actuator length.
+            msg.Data[0] = (actuatorJointList[0].position - actuatorJointList[1].position).magnitude;
 
-        // Forearm actuator length.
-        msg.Data[1] = (actuatorJointList[2].position - actuatorJointList[3].position).magnitude;
-        
-        // Base rotation.
-        msg.Data[2] = convertAngleRange(jointList[2].localEulerAngles.y);
+            // Forearm actuator length.
+            msg.Data[1] = (actuatorJointList[2].position - actuatorJointList[3].position).magnitude;
+            
+            // Base rotation.
+            msg.Data[2] = convertAngleRange(jointList[0].localEulerAngles.y);
 
-        // Hand Pitch
-        msg.Data[3] = convertAngleRange(jointList[3].localEulerAngles.z);
+            // Hand Pitch
+            msg.Data[3] = convertAngleRange(jointList[1].localEulerAngles.z);
 
-        // Hand Roll
-        msg.Data[4] = convertAngleRange(jointList[4].localEulerAngles.x);
+            // Hand Roll
+            msg.Data[4] = convertAngleRange(jointList[2].localEulerAngles.x);
 
-        // Hand Fingers Open/Close
-        msg.Data[5] = 0; //dataArray[0];
+            // Hand Fingers Open/Close
+            msg.Data[5] = 0; //dataArray[0];
 
-        //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
+            //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
 
-        chatter_pub.Publish(msg);
+            chatter_pub.Publish(msg);
+        }
     }
 
 

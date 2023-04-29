@@ -106,19 +106,19 @@ class ArmDriver(Node):
         self.time_of_last_callback = perf_counter()
 
         bicep_actuator_len, forearm_actuator_len = msg.data[0], msg.data[1], 
-        base_angle = msg.data[4]
-        pitch_angle, roll_angle, finger_velocity = msg.data[5], msg.data[6], msg.data[7]
+        base_angle = msg.data[2]
+        pitch_angle, roll_angle, finger_velocity = msg.data[3], msg.data[4], msg.data[5]
         
         # only change the arm position if any angles have changed
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
 
-        set_arm_rotation(self.mcp3, base_angle)
+        # set_arm_rotation(self.mcp3, base_angle)
 
         # Hand pitch and roll
         set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
 
         # Finger movement
-        open_close_hand(self.mcp3, finger_velocity)
+        # open_close_hand(self.mcp3, finger_velocity)
 
         # This prints an info message to the console, along with the data it received. 
         # for x in msg.data: print(x, end=' ')
@@ -130,14 +130,13 @@ class ArmDriver(Node):
     def get_motor_controllers(self):
 
         # Bash script is not moving during colcon build, and so am just pasting it here.
-        # TODO - Fix this
-
+        # TODO - Fix this                                                           os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../share/driver/gamepads.config'
         getter_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../share/py_pubsub/find_devpath.bash')
-
-        device_list = subprocess.run([getter_script], stdout=subprocess.PIPE, text=True, shell=True).stdout.splitlines()
+        device_list = subprocess.run(["\"" + getter_script + "\""], stdout=subprocess.PIPE, text=True, shell=True, executable='/bin/bash').stdout.splitlines()
+        print("BRUUUUUUUh")
 
         devpath_list = ["", "", ""]
-
+        print(devpath_list)
         # Add device paths to devpath list
         for device in device_list:
             splitStr = device.split(" - ")
@@ -163,17 +162,17 @@ class ArmDriver(Node):
             self.mcp1 = MotorController(
                 rc = Roboclaw(self.mcp_comport_list[0], 115200),
                 address = 0x80,  
-                m1 = Rotation_Motor(  # roll 
+                m1 = RotationMotor(  # roll 
                     encoder_max = 6580,      # Max PID position
                     encoder_min = -6583,        # Min PID position
                     angle_max   = 90,        # retract
                     angle_min   = -90,         # extend
                 ),
-                m2 = Rotation_Motor(  # pitch
+                m2 = RotationMotor(  # pitch
                     encoder_max = 7656,         # Max PID position
                     encoder_min = -6722,           # Min PID position
-                    angle_max   = 90,          # retract
-                    angle_min   = -90,           # extend
+                    angle_max   = -90,          # retract
+                    angle_min   = 90,           # extend
                 )
             )
 
@@ -182,47 +181,47 @@ class ArmDriver(Node):
             self.mcp2 = MotorController(
                 rc = Roboclaw(self.mcp_comport_list[1], 115200),
                 address = 0x80,  
-                m1 = Linear_Actuator(  # bicep 
+                m1 = LinearActuator(  # bicep 
                     encoder_max = 2633,      # retract
                     encoder_min = 153,        # extend
                     angle_max   = 75,        # retract
                     angle_min   = 5,         # extend
-                    length_max  = 34.2138,   # extend, centimeters
-                    length_min  = 24.2062,   # retract, centimeters
+                    length_min  = 4.1057,   # extend, centimeters
+                    length_max  = 2.8874,   # retract, centimeters
                     # position_on_arm = actuator_pos(7.16717277, 1.0, 6.5)  # inches
                     position_on_arm = actuator_tri(16.7042, 18.2046, 8.75) # (cm, cm, deg)
                 ),
-                m2 = Linear_Actuator(  # forearm
+                m2 = LinearActuator(  # forearm
                     encoder_max = 1893,         # retract
                     encoder_min = 20,           # extend
                     angle_max   = 140,          # retract
                     angle_min   = 75,           # extend
-                    length_max  = 34.2138,      # extend, centimeters
-                    length_min  = 25.4762,      # retract, centimeters
+                    length_min  = 4.0653,      # extend, centimeters
+                    length_max  = 3.1037,      # retract, centimeters
                     # position_on_arm = actuator_tri(3.0, 1.125, 12.50719421)  # inches
                     position_on_arm = actuator_tri(31.8965, 7.62, 5.14) # (cm, cm, deg)
                 )
             )
 
 
-            # Motor controller for turret and grip
-            self.mcp3 = MotorController(
-                rc = Roboclaw(self.mcp_comport_list[2], 115200),
-                address = 0x80,  
-                m1 = Gripper_Motor(  # Grip 
-                    # Note: Grip motor does not have encoder
-                ),
-                m2 = Rotation_Motor(  # Turret
-                    # Note: No limit needed for turret. Rotate via velocity rather than position.
-                    angle_min = -120,
-                    angle_max = 120,
-                    encoder_max = 13993,
-                    encoder_min = -11314
-                )
-            )
+            # # Motor controller for turret and grip
+            # self.mcp3 = MotorController(
+            #     rc = Roboclaw(self.mcp_comport_list[2], 115200),
+            #     address = 0x80,  
+            #     m1 = GripperMotor(  # Grip 
+            #         # Note: Grip motor does not have encoder
+            #     ),
+            #     m2 = RotationMotor(  # Turret
+            #         # Note: No limit needed for turret. Rotate via velocity rather than position.
+            #         angle_min = -120,
+            #         angle_max = 120,
+            #         encoder_max = 13993,
+            #         encoder_min = -11314
+            #     )
+            # )
 
             # Create list of motor controllers
-            self.MCP_List = [self.mcp1, self.mcp2, self.mcp3]
+            self.MCP_List = [self.mcp1, self.mcp2] #, self.mcp3]
 
 
 

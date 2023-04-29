@@ -52,6 +52,10 @@ class LinearActuator(Encoder, Angle):
 class RotationMotor(Encoder, Angle):
     ...
 
+@dataclass(frozen=True)
+class GripperMotor():
+    ...
+
 
 class MotorController:
     """Wrapper class for Roboclaw Motor Controller interfacing"""
@@ -100,7 +104,11 @@ def length_to_enc(motor : LinearActuator, length : float) -> int:
 def scale_actuator_length(motor: LinearActuator, length: float) -> int:
     """ linear interpolation of normalized actuator length to real encoder value
     y = mx + b: m = (encoder_max-encoder_min), b = encoder_min"""
-    return length * (motor.encoder_max - motor.encoder_min) + motor.encoder_min
+    # return length * (motor.encoder_max - motor.encoder_min) + motor.encoder_min
+
+    # TEMPORARY ******
+    slope = (motor.encoder_max - motor.encoder_min) / (motor.length_max - motor.length_min)
+    return int(slope * (length - motor.length_min) + motor.encoder_min)
 
 
 def set_arm_position(mcp: MotorController, bicep_actuator_len: float, forearm_actuator_len: float) -> None:
@@ -130,11 +138,14 @@ def set_hand_rotation(mcp: MotorController, hand_pitch: float, hand_roll: float)
     encoder_val_m1 = angle_to_enc(mcp.m1, hand_roll)
     encoder_val_m2 = angle_to_enc(mcp.m2, hand_pitch)
 
-    mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-        ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
-        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
-        BUFFER_OR_INSTANT 
-    )
+    # mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
+    #     ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
+    #     PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
+    #     BUFFER_OR_INSTANT 
+    # )
+
+    mcp.rc.SpeedAccelDeccelPositionM2(mcp.address,
+        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, BUFFER_OR_INSTANT)
 
 
 def open_close_hand(mcp: MotorController, move_velocity):
