@@ -85,7 +85,7 @@ public class IK_Controller : MonoBehaviour
         float rollDir = inputManager.gripRollLeftAction.IsPressed() ? -1 : inputManager.gripRollRightAction.IsPressed() ? 1 : 0;
 
         if (Mathf.Abs(rollDir) > 0)
-            gripRollJoint.rotation = Quaternion.AngleAxis(rollDir * gripRollSpeed * Time.deltaTime, gripRollJoint.right) * gripRollJoint.rotation;
+            gripRollJoint.localRotation = Quaternion.AngleAxis(rollDir * gripRollSpeed * Time.deltaTime, gripRollJoint.right) * gripRollJoint.localRotation;
 
         // Move IK target forward or backward along gripper direction -----------------------------
 
