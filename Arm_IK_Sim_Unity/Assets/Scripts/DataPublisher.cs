@@ -10,6 +10,7 @@ public class DataPublisher : MonoBehaviour
     private ROS2UnityComponent ros2Unity;
     private ROS2Node ros2Node;
     private IPublisher<std_msgs.msg.Float32MultiArray> chatter_pub;
+    [SerializeField] private Transform[] actuatorJointList;
     [SerializeField] private Transform[] jointList; // Arm joints
     private std_msgs.msg.Float32MultiArray msg;
 
@@ -41,12 +42,11 @@ public class DataPublisher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Note: Interior angles for arm joints
+        // Bicep actuator length.
+        msg.Data[0] = (actuatorJointList[0].position - actuatorJointList[1].position).magnitude;
 
-        // Shoulder joint.
-        msg.Data[0] = 360 - jointList[0].localEulerAngles.z;
-        // Elbow joint.
-        msg.Data[1] = 180 - jointList[1].localEulerAngles.z;
+        // Forearm actuator length.
+        msg.Data[1] = (actuatorJointList[2].position - actuatorJointList[3].position).magnitude;
         
         // Base rotation.
         msg.Data[2] = convertAngleRange(jointList[2].localEulerAngles.y);
@@ -58,7 +58,7 @@ public class DataPublisher : MonoBehaviour
         msg.Data[4] = convertAngleRange(jointList[4].localEulerAngles.x);
 
         // Hand Fingers Open/Close
-        msg.Data[5] = dataArray[0];
+        msg.Data[5] = 0; //dataArray[0];
 
         //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
 
