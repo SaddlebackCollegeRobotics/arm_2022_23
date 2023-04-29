@@ -379,7 +379,7 @@ MonoBehaviour:
   gripPitchJoint: {fileID: 1920084647}
   gripEnd: {fileID: 369128613}
   desiredGripPitchAngle: 0
-  useGripIK: 0
+  useGripIK: 1
 --- !u!1 &23334050
 GameObject:
   m_ObjectHideFlags: 0

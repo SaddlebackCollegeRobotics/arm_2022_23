@@ -46,38 +46,31 @@ public class IK_Controller : MonoBehaviour
 
     private void Update() // TODO - combine rotation setters for turretJoint localRotation
     {
+        Vector2 left_stick = inputManager.leftStickAction.ReadValue<Vector2>();
         Vector2 right_stick = inputManager.rightStickAction.ReadValue<Vector2>();
 
-        // Move IK target Up and Down
-        IKTarget.localPosition += new Vector3(0, right_stick.y * armMovementSpeed * Time.deltaTime);
+        // TODO - May need to fix some issues with this line
+        // Rotation input from stick with greater value.
+        float rotation_input = Mathf.Abs(left_stick.x) > Mathf.Abs(right_stick.x) ? left_stick.x : right_stick.x;
 
-        // Rotate turret joint using right_stick
-        turretJoint.localRotation = Quaternion.Euler(turretJoint.localEulerAngles.x, turretJoint.localEulerAngles.y + (turretRotationSpeed * Time.deltaTime * right_stick.x), turretJoint.localEulerAngles.z);
+        // Move IK target Up and Down / Forward and Backwards
+        IKTarget.localPosition += new Vector3(-left_stick.y, right_stick.y) * armMovementSpeed * Time.deltaTime;
 
-        Vector2 left_stick = inputManager.leftStickAction.ReadValue<Vector2>();
-
-        // Move IK target Forward and Backward.
-        IKTarget.localPosition += new Vector3(left_stick.y * -armMovementSpeed * Time.deltaTime, 0);
-
-        // Rotate turret joint using left_stick
-
-        turretJoint.localRotation = Quaternion.Euler(turretJoint.localEulerAngles.x, turretJoint.localEulerAngles.y + (turretRotationSpeed * Time.deltaTime * left_stick.x), turretJoint.localEulerAngles.z);
-
-        // TODO - Need to add this back in as reading from left stick.
-        /*// Move IK target forward or backward.
-        if (inputManager.armForwardAction.IsPressed())
-        {
-            IKTarget.localPosition += new Vector3(-armMovementOtherSpeed * Time.deltaTime, 0);
-        }
-        else if (inputManager.armBackwardAction.IsPressed())
-        {
-            IKTarget.localPosition += new Vector3(armMovementOtherSpeed * Time.deltaTime, 0);
-        }*/
+        // Rotate turret joint
+        if (Mathf.Abs(rotation_input) > 0)
+            turretJoint.localRotation = Quaternion.AngleAxis(turretRotationSpeed * Time.deltaTime * rotation_input, turretJoint.up) * turretJoint.localRotation;
 
         // Handle IK for gripper pitch ------------------------------------------------------------
 
         if (useGripIK)
         {
+            //Quaternion globRot = Quaternion.AngleAxis(desiredGripPitchAngle, gripPitchJoint.forward);
+
+
+            //Quaternion LocalRotation = Quaternion.Inverse(globRot) * globRot;
+            //gripPitchJoint.localRotation = LocalRotation;
+
+            // ORIGINAL
             gripPitchJoint.rotation = Quaternion.Euler(gripPitchJoint.eulerAngles.x, gripPitchJoint.eulerAngles.y, desiredGripPitchAngle);
             gripPitchJoint.localEulerAngles = new Vector3(0, 0, gripPitchJoint.localEulerAngles.z);
         }
@@ -94,16 +87,13 @@ public class IK_Controller : MonoBehaviour
         // Move IK target forward or backward along gripper direction -----------------------------
 
         Vector3 gripperDirection = (gripEnd.position - gripPitchJoint.position).normalized;
-        
-        if (inputManager.armForwardAction.IsPressed())
-        {
-            IKTarget.position += gripperDirection * armMovementOtherSpeed * Time.deltaTime;
-        }
-        else if (inputManager.armBackwardAction.IsPressed())
-        {
-            IKTarget.position += -gripperDirection * armMovementOtherSpeed * Time.deltaTime;
-        }
 
+        int moveDir = inputManager.armForwardAction.IsPressed() ? 1 : inputManager.armBackwardAction.IsPressed() ? -1 : 0;
+
+        if (Mathf.Abs(moveDir) > 0)
+            IKTarget.position += gripperDirection * moveDir * armMovementOtherSpeed * Time.deltaTime;
+
+        // Reset local Z to zero.
         IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);
 
         // Enforce IK target bounds -------------------------------
@@ -112,22 +102,12 @@ public class IK_Controller : MonoBehaviour
         {
             Vector3 localPos = IKTarget.localPosition;
 
-            if (localPos.x > IKLimits[0, 1])
+            for (int axis = 0; axis < 2; axis++)
             {
-                localPos.x = IKLimits[0, 1];
-            }
-            else if (localPos.x < IKLimits[0, 0])
-            {
-                localPos.x = IKLimits[0, 0];
-            }
+                float lowerLimit = IKLimits[axis, 0];
+                float upperLimit = IKLimits[axis, 1];
 
-            if (localPos.y > IKLimits[1, 1])
-            {
-                localPos.y = IKLimits[1, 1];
-            }
-            else if (localPos.y < IKLimits[1, 0])
-            {
-                localPos.y = IKLimits[1, 0];
+                localPos[axis] = Mathf.Clamp(localPos[axis], lowerLimit, upperLimit);
             }
 
             IKTarget.localPosition = localPos;
