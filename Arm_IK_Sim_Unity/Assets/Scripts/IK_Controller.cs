@@ -8,8 +8,8 @@ public class IK_Controller : MonoBehaviour
     [Header("Speed Adjustment")]
     [SerializeField] private float turretRotationSpeed = 25;
     [SerializeField] private float armMovementSpeed = 5;
-    [SerializeField] private float armMovementOtherSpeed = 3;
     [SerializeField] private float gripPitchSpeed = 20;
+    [SerializeField] private float gripRollSpeed = 20;
 
     [Header("Limits")]
     [SerializeField] private bool IKTargetLimits = true;
@@ -24,12 +24,15 @@ public class IK_Controller : MonoBehaviour
     
     };
 
-    [Header("IKJoints")]
+    [Header("IK Joints")]
     [SerializeField] private Transform turretJoint;
     [SerializeField] private Transform IKTarget;
 
     [SerializeField] private Transform gripPitchJoint;
     [SerializeField] private Transform gripEnd;
+
+    [Header("Other Joints")]
+    [SerializeField] private Transform gripRollJoint;
 
     [Header("Gripper")]
     [SerializeField] private float desiredGripPitchAngle;
@@ -64,25 +67,25 @@ public class IK_Controller : MonoBehaviour
 
         if (useGripIK)
         {
-            //Quaternion globRot = Quaternion.AngleAxis(desiredGripPitchAngle, gripPitchJoint.forward);
-
-
-            //Quaternion LocalRotation = Quaternion.Inverse(globRot) * globRot;
-            //gripPitchJoint.localRotation = LocalRotation;
-
-            // ORIGINAL
+            // TODO - Translate global angle to local angle.
             gripPitchJoint.rotation = Quaternion.Euler(gripPitchJoint.eulerAngles.x, gripPitchJoint.eulerAngles.y, desiredGripPitchAngle);
             gripPitchJoint.localEulerAngles = new Vector3(0, 0, gripPitchJoint.localEulerAngles.z);
         }
 
-        if (inputManager.gripPitchUpAction.IsPressed())
-        {
-            desiredGripPitchAngle += -gripPitchSpeed * Time.deltaTime;
-        }
-        else if (inputManager.gripPitchDownAction.IsPressed())
-        {
-            desiredGripPitchAngle += gripPitchSpeed * Time.deltaTime;
-        }
+        // Handle gripper pitch angle -------------------------------------------------------
+
+        float pitchDir = inputManager.gripPitchUpAction.IsPressed() ? -1 : inputManager.gripPitchDownAction.IsPressed() ? 1 : 0;
+        
+        if (Mathf.Abs(pitchDir) > 0)
+            desiredGripPitchAngle += pitchDir * gripPitchSpeed * Time.deltaTime;
+
+        // Handle gripper roll angle ---------------------------------------------------------
+        // TODO - May want to separate normal control from IK control ???
+
+        float rollDir = inputManager.gripRollLeftAction.IsPressed() ? -1 : inputManager.gripRollRightAction.IsPressed() ? 1 : 0;
+
+        if (Mathf.Abs(rollDir) > 0)
+            gripRollJoint.rotation = Quaternion.AngleAxis(rollDir * gripRollSpeed * Time.deltaTime, gripRollJoint.right) * gripRollJoint.rotation;
 
         // Move IK target forward or backward along gripper direction -----------------------------
 
@@ -91,7 +94,7 @@ public class IK_Controller : MonoBehaviour
         int moveDir = inputManager.armForwardAction.IsPressed() ? 1 : inputManager.armBackwardAction.IsPressed() ? -1 : 0;
 
         if (Mathf.Abs(moveDir) > 0)
-            IKTarget.position += gripperDirection * moveDir * armMovementOtherSpeed * Time.deltaTime;
+            IKTarget.position += gripperDirection * moveDir * armMovementSpeed * Time.deltaTime;
 
         // Reset local Z to zero.
         IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);

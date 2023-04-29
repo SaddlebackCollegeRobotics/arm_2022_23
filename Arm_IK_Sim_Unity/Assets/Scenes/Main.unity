@@ -370,14 +370,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turretRotationSpeed: 25
   armMovementSpeed: 5
-  armMovementOtherSpeed: 3
   gripPitchSpeed: 20
+  gripRollSpeed: 20
   IKTargetLimits: 1
   turretRotLimits: 1
   turretJoint: {fileID: 1779791557}
   IKTarget: {fileID: 1072998760}
   gripPitchJoint: {fileID: 1920084647}
   gripEnd: {fileID: 369128613}
+  gripRollJoint: {fileID: 2124857812}
   desiredGripPitchAngle: 0
   useGripIK: 1
 --- !u!1 &23334050
