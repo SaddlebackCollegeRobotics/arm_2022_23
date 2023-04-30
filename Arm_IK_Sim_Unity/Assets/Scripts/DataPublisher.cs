@@ -16,6 +16,8 @@ public class DataPublisher : MonoBehaviour
 
     public float[] dataArray = new float[1]; // Extra data to be published.
 
+    InputManager inputManager;
+
 
     private void Awake()
     {
@@ -36,7 +38,8 @@ public class DataPublisher : MonoBehaviour
             ros2Node = ros2Unity.CreateNode("ROS2UnityNode");
             chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/arm/control_instruction"); 
         }
-        
+
+        inputManager = InputManager.GetInstance();
     }
 
     // Update is called once per frame
@@ -60,7 +63,12 @@ public class DataPublisher : MonoBehaviour
             msg.Data[4] = convertAngleRange(jointList[2].localEulerAngles.x);
 
             // Hand Fingers Open/Close
-            msg.Data[5] = 0; //dataArray[0];
+
+            int fingerDir = inputManager.gripCloseAction.IsPressed() ? -1 : inputManager.gripOpenAction.IsPressed() ? 1 : 0;
+
+            print(fingerDir);
+
+            msg.Data[5] = fingerDir;
 
             //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
 

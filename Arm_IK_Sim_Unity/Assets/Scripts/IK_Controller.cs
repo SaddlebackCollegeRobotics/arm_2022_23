@@ -1,5 +1,6 @@
 // Author: Cameron Rosenthal @Supernova1114
 
+using RootMotion.FinalIK;
 using UnityEngine;
 
 
@@ -18,9 +19,9 @@ public class IK_Controller : MonoBehaviour
     [SerializeField]
     private float[,] IKLimits = {
 
-        {-13.8f, -7f},   // IK Target  = (Min X, Max X)   
-        {-4.67f, 10.8f}, // IK Target  = (Min Y, Max Y)
-        {-225f, 225f}    // Turret Rot = (Min Angle, Max Angle)
+        {-14f, -7.847f},   // IK Target  = (Min X, Max X)   
+        {-4.67f, 10.8f},     // IK Target  = (Min Y, Max Y)
+        {-225f, 225f}        // Turret Rot = (Min Angle, Max Angle)
     
     };
 
@@ -30,6 +31,9 @@ public class IK_Controller : MonoBehaviour
 
     [SerializeField] private Transform gripPitchJoint;
     [SerializeField] private Transform gripEnd;
+
+    [SerializeField] private Transform IKTargetHome;
+
 
     [Header("Other Joints")]
     [SerializeField] private Transform gripRollJoint;
@@ -41,14 +45,44 @@ public class IK_Controller : MonoBehaviour
 
     private InputManager inputManager;
 
+    private CCDIK IKSolver;
+    private bool isIKWritten = false;
+
+    private Quaternion temp;
+
+
 
     private void Start()
     {
         inputManager = InputManager.GetInstance();
+        IKSolver = GetComponent<CCDIK>();
+
+
+        //IKSolver.GetIKSolver().OnPostUpdate += () => { isIKWritten = true; };
     }
+
+    
 
     private void Update() // TODO - combine rotation setters for turretJoint localRotation
     {
+        /*Vector3 targetPos = IKTarget.position;
+        targetPos.x = IKTargetHome.position.x;
+        IKTarget.position = targetPos;*/
+
+
+        /*// Reset IK target to its local home position after IK updates.
+        if (isIKWritten)
+        {
+            isIKWritten = false;
+
+            IKTarget.position = IKTargetHome.position;
+            IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);
+        }*/
+
+        //IKTarget.position = IKTargetHome.position;
+        //IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);
+
+            
         Vector2 left_stick = inputManager.leftStickAction.ReadValue<Vector2>();
         Vector2 right_stick = inputManager.rightStickAction.ReadValue<Vector2>();
 
@@ -85,7 +119,8 @@ public class IK_Controller : MonoBehaviour
         float rollDir = inputManager.gripRollLeftAction.IsPressed() ? -1 : inputManager.gripRollRightAction.IsPressed() ? 1 : 0;
 
         if (Mathf.Abs(rollDir) > 0)
-            gripRollJoint.localRotation = Quaternion.AngleAxis(rollDir * gripRollSpeed * Time.deltaTime, gripRollJoint.right) * gripRollJoint.localRotation;
+            gripRollJoint.localRotation = Quaternion.Euler(gripRollJoint.localEulerAngles.x + (rollDir * gripRollSpeed * Time.deltaTime), gripRollJoint.localRotation.y, gripRollJoint.localRotation.z);
+
 
         // Move IK target forward or backward along gripper direction -----------------------------
 
