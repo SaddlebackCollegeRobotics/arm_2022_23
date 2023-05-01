@@ -11,6 +11,7 @@ from .arm_controller import *
 import signal
 import subprocess
 import os
+import sys
 
 
 class ArmDriver(Node):
@@ -23,7 +24,7 @@ class ArmDriver(Node):
 
         print("\nExited Safely")
 
-        quit()
+        sys.exit()
 
 
     # Callback for Ctrl+C
@@ -36,6 +37,8 @@ class ArmDriver(Node):
         # Signal handler for Ctrl+C
         signal.signal(signal.SIGINT, self.signalHandler)
 
+        
+
         # Get motor controller device paths
         self.mcp_comport_list = self.get_motor_controllers()
 
@@ -43,22 +46,31 @@ class ArmDriver(Node):
         self.initialize_motor_controllers()
         self.initialize_additional_controllers()
 
-        # TODO - Eventually save previously known value for quad encoders. Do we need this for now?
-        # Set encoder values to zero
-        # self.mcp1.rc.SetEncM1(self.mcp1.address, 0) # Roll
-        # self.mcp1.rc.SetEncM2(self.mcp1.address, 0) # Pitch
-        # self.mcp3.rc.SetEncM2(self.mcp3.address, 0) # Turret
-
         # Give the node a name.
         super().__init__('arm_driver')
 
-        # Subscribe to the topic. Callback gets called when a message is received.
-        self.subscription = self.create_subscription(
-            Float32MultiArray,
-            '/arm/control_instruction',
-            self.subscriber_callback,  # listener callback
-            10)
-        self.subscription  # prevent unused variable warning
+        # Ask to run open or closed loop
+        self.driver_mode = self.show_menu()
+
+        if self.driver_mode == 1: 
+
+            # Non IK controls subscription
+            self.subscription = self.create_subscription(
+                Float32MultiArray,
+                '/arm/control_instruction_nonIK',
+                self.nonIK_subscriber_callback,  # subscriber callback
+                10)
+            self.subscription  # prevent unused variable warning
+
+        elif self.driver_mode == 2:
+
+            # IK controls subscription
+            self.subscription = self.create_subscription(
+                Float32MultiArray,
+                '/arm/control_instruction_IK',
+                self.IK_subscriber_callback,  # subscriber callback
+                10)
+            self.subscription  # prevent unused variable warning
 
         self.time_of_last_callback = perf_counter()
         self.timer_period = 0.5 # Interval for checking heartbeat.
@@ -68,6 +80,28 @@ class ArmDriver(Node):
         self.last_poker_velocity = 0
 
 
+    # Show menu on program start
+    def show_menu(self):
+
+        MIN_MENU = 1
+        MAX_MENU = 2
+
+        while True:
+
+            # Choose between IK and Normal subscriber
+            choice = input("Choose an option:\n1. Normal\n2. IK\n")
+
+            if choice.isnumeric() == False:
+                continue
+
+            choice = int(choice)
+
+            if choice < MIN_MENU or choice > MAX_MENU:
+                continue
+
+            return choice
+
+            
     # For safety. Check if controls are being received by subscriber callback
     # Stop motors if subscription not being received.
     def subscription_heartbeat(self):
@@ -86,15 +120,15 @@ class ArmDriver(Node):
                 mcp.rc.ForwardM2(mcp.address, 0)
 
 
-    # Arm control instructions
+    # Arm control instructions for IK control
     # Called every time the subscriber receives a message
-    def subscriber_callback(self, msg):
+    def IK_subscriber_callback(self, msg):
 
         self.time_of_last_callback = perf_counter()
 
         # Unpack ROS2 message
         bicep_actuator_len, forearm_actuator_len = msg.data[0], msg.data[1]
-        base_angle = msg.data[2]
+        turret_angle = msg.data[2]
         pitch_angle, roll_angle = msg.data[3], msg.data[4]
         grip_velocity = msg.data[5]
         poker_velocity = msg.data[6]
@@ -109,7 +143,7 @@ class ArmDriver(Node):
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
 
         # Turret rotation
-        set_arm_rotation(self.mcp3, base_angle)
+        set_arm_rotation(self.mcp3, turret_angle)
 
         # End-effector pitch and roll
         set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
@@ -123,6 +157,46 @@ class ArmDriver(Node):
         if poker_velocity != self.last_poker_velocity:
             self.last_poker_velocity = poker_velocity
             set_poker(self.poker_controller, poker_velocity)
+
+
+    # Arm control instructions for non IK control
+    # Called every time the subscriber receives a message
+    def nonIK_subscriber_callback(self, msg):
+
+        self.time_of_last_callback = perf_counter()
+
+        # Unpack ROS2 message
+        bicep_dir, forearm_dir = msg.data[0], msg.data[1]
+        turret_dir = msg.data[2]
+        pitch_dir, roll_dir = msg.data[3], msg.data[4]
+        grip_velocity = msg.data[5]
+        poker_velocity = msg.data[6]
+        safety_trigger = True if int(msg.data[7]) == 1 else False
+
+        # Handle safety trigger
+        if safety_trigger == False:
+            self.softStop()
+            return
+
+        # Bicep and forearm
+        set_arm_velocity(self.mcp2, int(bicep_dir), int(forearm_dir))
+
+        # Turret rotation
+        set_arm_rotation_velocity(self.mcp3, int(turret_dir))
+
+        # End-effector pitch and roll
+        set_hand_rotation_velocity(self.mcp1, int(pitch_dir), int(roll_dir))
+
+        # Grip movement
+        open_close_hand(self.mcp3, int(grip_velocity))
+
+        poker_velocity = int(poker_velocity)
+        
+        # Poker movement - Only set if command changes
+        if poker_velocity != self.last_poker_velocity:
+            self.last_poker_velocity = poker_velocity
+            set_poker(self.poker_controller, poker_velocity)
+
 
 
     # Get motor controller device paths using serial IDs

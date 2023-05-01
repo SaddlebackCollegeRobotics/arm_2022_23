@@ -134,13 +134,28 @@ def set_hand_rotation(mcp: MotorController, hand_pitch: float, hand_roll: float)
     )
 
 
-# Set end_effector grip movement
+# Set arm bicep and forearm velocities using PWM
+def set_arm_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
+    ...
+    
+
+# Set turret rotation velocity using PWM
+def set_arm_rotation_velocity(mcp: MotorController, turret_dir: int):
+    ...
+
+
+# Set end-effector pitch and roll velocities using PWM 
+def set_hand_rotation_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
+    ...
+
+
+# Set end-effector grip movement
 def open_close_hand(mcp: MotorController, move_velocity: int):
     
     if move_velocity == 0:
         mcp.rc.ForwardM1(mcp.address, 0)
     else:
-        mcp.rc.SpeedAccelM1(mcp.address, 20, move_velocity)
+        mcp.rc.SpeedAccelM1(mcp.address, 20, -move_velocity)
 
 
 # Set poker movement
