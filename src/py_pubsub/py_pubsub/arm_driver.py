@@ -204,7 +204,6 @@ class ArmDriver(Node):
             )
 
 
-            #     m1 = GripperMotor(  # Grip 
             # Motor controller for turret and grip
             self.mcp3 = MotorController(
                 rc = Roboclaw(self.mcp_comport_list[2], 115200),
