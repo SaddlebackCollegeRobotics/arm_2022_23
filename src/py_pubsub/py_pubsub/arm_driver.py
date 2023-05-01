@@ -112,13 +112,13 @@ class ArmDriver(Node):
         # only change the arm position if any angles have changed
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
 
-        # set_arm_rotation(self.mcp3, base_angle)
+        set_arm_rotation(self.mcp3, base_angle)
 
         # Hand pitch and roll
         set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
 
         # Finger movement
-        # open_close_hand(self.mcp3, finger_velocity)
+        open_close_hand(self.mcp3, finger_velocity)
 
         # This prints an info message to the console, along with the data it received. 
         # for x in msg.data: print(x, end=' ')
@@ -204,21 +204,22 @@ class ArmDriver(Node):
             )
 
 
-            # # Motor controller for turret and grip
-            # self.mcp3 = MotorController(
-            #     rc = Roboclaw(self.mcp_comport_list[2], 115200),
-            #     address = 0x80,  
             #     m1 = GripperMotor(  # Grip 
-            #         # Note: Grip motor does not have encoder
-            #     ),
-            #     m2 = RotationMotor(  # Turret
-            #         # Note: No limit needed for turret. Rotate via velocity rather than position.
-            #         angle_min = -120,
-            #         angle_max = 120,
-            #         encoder_max = 13993,
-            #         encoder_min = -11314
-            #     )
-            # )
+            # Motor controller for turret and grip
+            self.mcp3 = MotorController(
+                rc = Roboclaw(self.mcp_comport_list[2], 115200),
+                address = 0x80,  
+                m1 = GripperMotor(  # Grip 
+                    # Note: Grip motor does not have encoder
+                ),
+                m2 = RotationMotor(  # Turret
+                    # Note: No limit needed for turret. Rotate via velocity rather than position.
+                    angle_min = -120,
+                    angle_max = 120,
+                    encoder_max = 13993,
+                    encoder_min = -11314
+                )
+            )
 
             # Create list of motor controllers
             self.MCP_List = [self.mcp1, self.mcp2] #, self.mcp3]

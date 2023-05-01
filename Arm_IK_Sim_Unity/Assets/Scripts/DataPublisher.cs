@@ -66,7 +66,7 @@ public class DataPublisher : MonoBehaviour
 
             int fingerDir = inputManager.gripCloseAction.IsPressed() ? -1 : inputManager.gripOpenAction.IsPressed() ? 1 : 0;
 
-            print(fingerDir);
+            //print(fingerDir);
 
             msg.Data[5] = fingerDir;
 

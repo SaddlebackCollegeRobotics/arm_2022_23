@@ -138,14 +138,14 @@ def set_hand_rotation(mcp: MotorController, hand_pitch: float, hand_roll: float)
     encoder_val_m1 = angle_to_enc(mcp.m1, hand_roll)
     encoder_val_m2 = angle_to_enc(mcp.m2, hand_pitch)
 
-    # mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-    #     ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
-    #     PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
-    #     BUFFER_OR_INSTANT 
-    # )
+    mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
+        ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
+        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
+        BUFFER_OR_INSTANT 
+    )
 
-    mcp.rc.SpeedAccelDeccelPositionM2(mcp.address,
-        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, BUFFER_OR_INSTANT)
+    # mcp.rc.SpeedAccelDeccelPositionM2(mcp.address,
+    #     PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, BUFFER_OR_INSTANT)
 
 
 def open_close_hand(mcp: MotorController, move_velocity):
