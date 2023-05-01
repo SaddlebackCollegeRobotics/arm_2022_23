@@ -45,44 +45,16 @@ public class IK_Controller : MonoBehaviour
 
     private InputManager inputManager;
 
-    private CCDIK IKSolver;
-    private bool isIKWritten = false;
-
-    private Quaternion temp;
-
-
-
     private void Start()
     {
         inputManager = InputManager.GetInstance();
-        IKSolver = GetComponent<CCDIK>();
-
-
-        //IKSolver.GetIKSolver().OnPostUpdate += () => { isIKWritten = true; };
     }
 
     
 
     private void Update() // TODO - combine rotation setters for turretJoint localRotation
     {
-        /*Vector3 targetPos = IKTarget.position;
-        targetPos.x = IKTargetHome.position.x;
-        IKTarget.position = targetPos;*/
 
-
-        /*// Reset IK target to its local home position after IK updates.
-        if (isIKWritten)
-        {
-            isIKWritten = false;
-
-            IKTarget.position = IKTargetHome.position;
-            IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);
-        }*/
-
-        //IKTarget.position = IKTargetHome.position;
-        //IKTarget.localPosition = new Vector3(IKTarget.localPosition.x, IKTarget.localPosition.y, 0);
-
-            
         Vector2 left_stick = inputManager.leftStickAction.ReadValue<Vector2>();
         Vector2 right_stick = inputManager.rightStickAction.ReadValue<Vector2>();
 

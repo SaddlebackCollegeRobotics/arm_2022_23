@@ -53,24 +53,23 @@ public class DataPublisher : MonoBehaviour
             // Forearm actuator length.
             msg.Data[1] = (actuatorJointList[2].position - actuatorJointList[3].position).magnitude;
             
-            // Base rotation.
+            // Turret rotation.
             msg.Data[2] = convertAngleRange(jointList[0].localEulerAngles.y);
 
-            // Hand Pitch
+            // Hand pitch
             msg.Data[3] = convertAngleRange(jointList[1].localEulerAngles.z);
 
-            // Hand Roll
+            // Hand roll
             msg.Data[4] = convertAngleRange(jointList[2].localEulerAngles.x);
 
-            // Hand Fingers Open/Close
-
             int fingerDir = inputManager.gripCloseAction.IsPressed() ? -1 : inputManager.gripOpenAction.IsPressed() ? 1 : 0;
-
-            //print(fingerDir);
-
+            int pokerDir = inputManager.pokerInAction.IsPressed() ? -1 : inputManager.pokerOutAction.IsPressed() ? 1 : 0;
+            
+            // Handle fingers Open/Close
             msg.Data[5] = fingerDir;
-
-            //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
+            
+            // Handle poker In/Out
+            msg.Data[6] = pokerDir;
 
             chatter_pub.Publish(msg);
         }

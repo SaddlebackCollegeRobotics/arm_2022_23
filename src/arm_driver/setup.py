@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'py_pubsub'
+package_name = 'arm_driver'
 
 setup(
     name=package_name,
@@ -10,7 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name, ['py_pubsub/find_devpath.bash']),
+        ('share/' + package_name, ['arm_driver/find_devpath.bash']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -21,9 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'talker = py_pubsub.publisher_member_function:main',
-            'listener = py_pubsub.subscriber_member_function:main',
-            'arm_driver = py_pubsub.arm_driver:main',
+            'arm_subscriber = arm_driver.arm_subscriber:main',
         ],
     },
 )

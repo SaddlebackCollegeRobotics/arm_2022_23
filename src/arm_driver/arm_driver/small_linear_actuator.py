@@ -1,3 +1,5 @@
+# Author: Jasper Doan - @wluxie
+
 import RPi.GPIO as GPIO
 import time
 
