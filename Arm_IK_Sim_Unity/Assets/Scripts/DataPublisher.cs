@@ -33,7 +33,7 @@ public class DataPublisher : MonoBehaviour
         if (ros2Unity.Ok())
         {
             msg = new std_msgs.msg.Float32MultiArray();
-            msg.Data = new float[6];
+            msg.Data = new float[8];
 
             ros2Node = ros2Unity.CreateNode("ROS2UnityNode");
             chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/arm/control_instruction"); 
@@ -70,6 +70,9 @@ public class DataPublisher : MonoBehaviour
             
             // Handle poker In/Out
             msg.Data[6] = pokerDir;
+
+            // Handle safety trigger
+            msg.Data[7] = inputManager.safetyAction.IsPressed() ? 1 : 0;
 
             chatter_pub.Publish(msg);
         }

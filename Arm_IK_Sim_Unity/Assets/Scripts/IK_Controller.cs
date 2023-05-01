@@ -54,6 +54,8 @@ public class IK_Controller : MonoBehaviour
 
     private void Update() // TODO - combine rotation setters for turretJoint localRotation
     {
+        if (!inputManager.safetyAction.IsPressed())
+            return;
 
         Vector2 left_stick = inputManager.leftStickAction.ReadValue<Vector2>();
         Vector2 right_stick = inputManager.rightStickAction.ReadValue<Vector2>();

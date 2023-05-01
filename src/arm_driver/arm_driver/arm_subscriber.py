@@ -98,6 +98,12 @@ class ArmDriver(Node):
         pitch_angle, roll_angle = msg.data[3], msg.data[4]
         grip_velocity = msg.data[5]
         poker_velocity = msg.data[6]
+        safety_trigger = True if int(msg.data[7]) == 1 else False
+
+        # Handle safety trigger
+        if safety_trigger == False:
+            self.softStop()
+            return
 
         # Bicep and forearm
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
