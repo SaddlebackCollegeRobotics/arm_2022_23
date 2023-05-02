@@ -198,14 +198,13 @@ class ArmDriver(Node):
             set_poker(self.poker_controller, poker_velocity)
 
 
-
     # Get motor controller device paths using serial IDs
     def get_motor_controllers(self):
 
         getter_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../share/arm_driver/find_devpath.bash')
         device_list = subprocess.run(["\"" + getter_script + "\""], stdout=subprocess.PIPE, text=True, shell=True, executable='/bin/bash').stdout.splitlines()
         
-        devpath_list = ["", "", ""]
+        devpath_list = str[3]
 
         # Add device paths to devpath list
         for device in device_list:
