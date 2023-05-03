@@ -20,7 +20,7 @@ class ArmDriver(Node):
     def quit_program_safely(self):
 
         self.softStop()
-        self.poker_controller.cleanup()
+        # self.poker_controller.cleanup()
 
         print("\nExited Safely")
 
@@ -37,10 +37,12 @@ class ArmDriver(Node):
         # Signal handler for Ctrl+C
         signal.signal(signal.SIGINT, self.signalHandler)
 
-        
-
         # Get motor controller device paths
         self.mcp_comport_list = self.get_motor_controllers()
+
+        if self.mcp_comport_list.__len__() == 0:
+            print("No motor controllers detected. Exiting.")
+            sys.exit()
 
         # Initialize motor controllers
         self.initialize_motor_controllers()
@@ -89,7 +91,7 @@ class ArmDriver(Node):
         while True:
 
             # Choose between IK and Normal subscriber
-            choice = input("Choose an option:\n1. Normal\n2. IK\n")
+            choice = input("Choose an option:\n1. Normal\n2. IK\n:: ")
 
             if choice.isnumeric() == False:
                 continue
@@ -139,24 +141,26 @@ class ArmDriver(Node):
             self.softStop()
             return
 
+        print("Arm control instructions received.")
+
         # Bicep and forearm
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
 
         # Turret rotation
-        set_arm_rotation(self.mcp3, turret_angle)
+        # set_arm_rotation(self.mcp3, turret_angle)
 
         # End-effector pitch and roll
-        set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
+        # set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
 
         # Grip movement
-        open_close_hand(self.mcp3, int(grip_velocity))
+        # open_close_hand(self.mcp3, int(grip_velocity))
 
-        poker_velocity = int(poker_velocity)
+        # poker_velocity = int(poker_velocity)
         
-        # Poker movement - Only set if command changes
-        if poker_velocity != self.last_poker_velocity:
-            self.last_poker_velocity = poker_velocity
-            set_poker(self.poker_controller, poker_velocity)
+        # # Poker movement - Only set if command changes
+        # if poker_velocity != self.last_poker_velocity:
+        #     self.last_poker_velocity = poker_velocity
+        #     set_poker(self.poker_controller, poker_velocity)
 
 
     # Arm control instructions for non IK control
@@ -190,12 +194,12 @@ class ArmDriver(Node):
         # Grip movement
         open_close_hand(self.mcp3, int(grip_velocity))
 
-        poker_velocity = int(poker_velocity)
+        # poker_velocity = int(poker_velocity)
         
-        # Poker movement - Only set if command changes
-        if poker_velocity != self.last_poker_velocity:
-            self.last_poker_velocity = poker_velocity
-            set_poker(self.poker_controller, poker_velocity)
+        # # Poker movement - Only set if command changes
+        # if poker_velocity != self.last_poker_velocity:
+        #     self.last_poker_velocity = poker_velocity
+        #     set_poker(self.poker_controller, poker_velocity)
 
 
     # Get motor controller device paths using serial IDs
@@ -204,7 +208,7 @@ class ArmDriver(Node):
         getter_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../share/arm_driver/find_devpath.bash')
         device_list = subprocess.run(["\"" + getter_script + "\""], stdout=subprocess.PIPE, text=True, shell=True, executable='/bin/bash').stdout.splitlines()
         
-        devpath_list = str[3]
+        devpath_list = ["", "", ""]
 
         # Add device paths to devpath list
         for device in device_list:
@@ -298,7 +302,8 @@ class ArmDriver(Node):
 
     # Initialize additional motor controllers
     def initialize_additional_controllers(self):
-        self.poker_controller = small_linear_actuator.Alfreds_Finger()
+        # self.poker_controller = small_linear_actuator.Alfreds_Finger()
+        ...
 
 
 def main(args=None):

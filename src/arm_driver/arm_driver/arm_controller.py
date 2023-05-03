@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from .roboclaw_3 import Roboclaw
-import small_linear_actuator
+# from .small_linear_actuator import Alfreds_Finger
 # from collections import namedtuple
 
 
@@ -159,10 +159,10 @@ def open_close_hand(mcp: MotorController, move_velocity: int):
 
 
 # Set poker movement
-def set_poker(motor_driver: small_linear_actuator.Alfreds_Finger, move_velocity: int):
+# def set_poker(motor_driver: Alfreds_Finger, move_velocity: int):
 
-    if move_velocity == 1:
-        motor_driver.push()
-    elif move_velocity == -1:
-        motor_driver.pull()
+#     if move_velocity == 1:
+#         motor_driver.push()
+#     elif move_velocity == -1:
+#         motor_driver.pull()
     
