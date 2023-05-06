@@ -34,6 +34,8 @@ class ArmDriver(Node):
 
     def __init__(self):
 
+        self.angle_roll : float = 0.0
+
         # Signal handler for Ctrl+C
         signal.signal(signal.SIGINT, self.signalHandler)
 
@@ -142,6 +144,7 @@ class ArmDriver(Node):
             return
 
         print("Arm control instructions received.")
+        print('Angle of roll: ', self.angle_roll)
 
         # Bicep and forearm
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
@@ -154,10 +157,10 @@ class ArmDriver(Node):
 
         # Temp set to non PID as encoder wires need fixing.
         # End-effector roll
-        set_hand_roll_velocity(self.mcp1, roll_dir)
+        self.angle_roll = set_hand_roll_velocity(self.mcp1, int(roll_dir), self.angle_roll)
 
         # Grip movement
-        # open_close_hand(self.mcp3, int(grip_velocity))
+        open_close_hand(self.mcp3, int(grip_velocity))
 
         # poker_velocity = int(poker_velocity)
         
@@ -165,6 +168,8 @@ class ArmDriver(Node):
         # if poker_velocity != self.last_poker_velocity:
         #     self.last_poker_velocity = poker_velocity
         #     set_poker(self.poker_controller, poker_velocity)
+
+        print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
 
 
     # Arm control instructions for non IK control

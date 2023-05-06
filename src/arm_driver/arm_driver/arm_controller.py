@@ -157,7 +157,7 @@ def set_hand_pitch(mcp: MotorController, hand_pitch: float) -> None:
 
 
 # Set end-effector pitch velocity using PWM
-def set_hand_pitch_velocity(mcp: MotorController, pitch_dir):
+def set_hand_pitch_velocity(mcp: MotorController, pitch_dir: int):
     
     if pitch_dir == 0:
         mcp.rc.ForwardM2(mcp.address, 0)
@@ -166,12 +166,26 @@ def set_hand_pitch_velocity(mcp: MotorController, pitch_dir):
 
 
 # Set end-effector roll velocity using PWM
-def set_hand_roll_velocity(mcp: MotorController, roll_dir):
-    
-    if roll_dir == 0:
+def set_hand_roll_velocity(mcp: MotorController, roll_dir: int, angle: int) -> int:
+
+    if angle >= 90 and roll_dir == 1:
         mcp.rc.ForwardM1(mcp.address, 0)
-    else:
-        mcp.rc.SpeedAccelM1(mcp.address, 20, -roll_dir)
+    
+    elif angle <= -90 and roll_dir == -1:
+        mcp.rc.ForwardM1(mcp.address, 0)
+    
+    elif roll_dir == 0:
+        mcp.rc.ForwardM1(mcp.address, 0)
+
+    elif roll_dir == 1 and angle < 90:
+        mcp.rc.BackwardM1(mcp.address, 20)
+        angle += 1
+
+    elif roll_dir == -1 and angle > -90:
+        mcp.rc.ForwardM1(mcp.address, 20)
+        angle -= 1
+
+    return angle
 
 
 # Set arm bicep and forearm velocities using PWM
