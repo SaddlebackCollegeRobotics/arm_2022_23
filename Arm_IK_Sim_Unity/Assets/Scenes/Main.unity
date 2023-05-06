@@ -376,7 +376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd192800a61d3241973477e9d8faa8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turretRotationSpeed: 25
+  turretRotationSpeed: 20
   armMovementSpeed: 5
   gripPitchSpeed: 20
   gripRollSpeed: 20
