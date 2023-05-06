@@ -134,6 +134,46 @@ def set_hand_rotation(mcp: MotorController, hand_pitch: float, hand_roll: float)
     )
 
 
+# Set end-effector roll using PID
+def set_hand_roll(mcp: MotorController, hand_roll: float) -> None:
+
+    encoder_val_m1 = angle_to_enc(mcp.m1, hand_roll)
+
+    mcp.rc.SpeedAccelDeccelPositionM1(mcp.address, 
+        ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
+        BUFFER_OR_INSTANT 
+    )
+
+
+# Set end-effector pitch using PID
+def set_hand_pitch(mcp: MotorController, hand_pitch: float) -> None:
+
+    encoder_val_m2 = angle_to_enc(mcp.m2, hand_pitch)
+
+    mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
+        PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
+        BUFFER_OR_INSTANT 
+    )
+
+
+# Set end-effector pitch velocity using PWM
+def set_hand_pitch_velocity(mcp: MotorController, pitch_dir):
+    
+    if pitch_dir == 0:
+        mcp.rc.ForwardM2(mcp.address, 0)
+    else:
+        mcp.rc.SpeedAccelM2(mcp.address, 20, -pitch_dir)
+
+
+# Set end-effector roll velocity using PWM
+def set_hand_roll_velocity(mcp: MotorController, roll_dir):
+    
+    if roll_dir == 0:
+        mcp.rc.ForwardM1(mcp.address, 0)
+    else:
+        mcp.rc.SpeedAccelM1(mcp.address, 20, -roll_dir)
+
+
 # Set arm bicep and forearm velocities using PWM
 def set_arm_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
     ...
@@ -141,11 +181,6 @@ def set_arm_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
 
 # Set turret rotation velocity using PWM
 def set_arm_rotation_velocity(mcp: MotorController, turret_dir: int):
-    ...
-
-
-# Set end-effector pitch and roll velocities using PWM 
-def set_hand_rotation_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
     ...
 
 

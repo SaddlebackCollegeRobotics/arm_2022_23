@@ -59,8 +59,11 @@ public class DataPublisher : MonoBehaviour
             // Hand pitch
             msg.Data[3] = convertAngleRange(jointList[1].localEulerAngles.z);
 
+            int rollDir = inputManager.gripRollLeftAction.IsPressed() ? -1 : inputManager.gripRollRightAction.IsPressed() ? 1 : 0;
+
             // Hand roll
-            msg.Data[4] = convertAngleRange(jointList[2].localEulerAngles.x);
+            msg.Data[4] = rollDir;
+            //msg.Data[4] = convertAngleRange(jointList[2].localEulerAngles.x);
 
             int fingerDir = inputManager.gripCloseAction.IsPressed() ? -1 : inputManager.gripOpenAction.IsPressed() ? 1 : 0;
             int pokerDir = inputManager.pokerInAction.IsPressed() ? -1 : inputManager.pokerOutAction.IsPressed() ? 1 : 0;

@@ -71,7 +71,7 @@ public class IK_Controller : MonoBehaviour
         if (Mathf.Abs(rotation_input) > 0)
             turretJoint.localRotation = Quaternion.AngleAxis(turretRotationSpeed * Time.deltaTime * rotation_input, turretJoint.up) * turretJoint.localRotation;
 
-        // Handle IK for gripper pitch ------------------------------------------------------------
+        /*// Handle IK for gripper pitch ------------------------------------------------------------
 
         if (useGripIK)
         {
@@ -85,10 +85,16 @@ public class IK_Controller : MonoBehaviour
         float pitchDir = inputManager.gripPitchUpAction.IsPressed() ? -1 : inputManager.gripPitchDownAction.IsPressed() ? 1 : 0;
         
         if (Mathf.Abs(pitchDir) > 0)
-            desiredGripPitchAngle += pitchDir * gripPitchSpeed * Time.deltaTime;
+            desiredGripPitchAngle += pitchDir * gripPitchSpeed * Time.deltaTime;*/
+
+        // Handle gripper pitch angle (Non IK) -----------------------------------------------
+
+        float pitchDir = inputManager.gripPitchUpAction.IsPressed() ? -1 : inputManager.gripPitchDownAction.IsPressed() ? 1 : 0;
+
+        if (Mathf.Abs(pitchDir) > 0)
+            gripPitchJoint.localRotation = Quaternion.Euler(gripPitchJoint.localRotation.x, gripPitchJoint.localRotation.y, gripPitchJoint.localEulerAngles.z + (pitchDir * gripPitchSpeed * Time.deltaTime));
 
         // Handle gripper roll angle ---------------------------------------------------------
-        // TODO - May want to separate normal control from IK control ???
 
         float rollDir = inputManager.gripRollLeftAction.IsPressed() ? -1 : inputManager.gripRollRightAction.IsPressed() ? 1 : 0;
 

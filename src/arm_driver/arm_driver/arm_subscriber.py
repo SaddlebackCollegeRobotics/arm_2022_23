@@ -131,7 +131,7 @@ class ArmDriver(Node):
         # Unpack ROS2 message
         bicep_actuator_len, forearm_actuator_len = msg.data[0], msg.data[1]
         turret_angle = msg.data[2]
-        pitch_angle, roll_angle = msg.data[3], msg.data[4]
+        pitch_angle, roll_dir = msg.data[3], msg.data[4]
         grip_velocity = msg.data[5]
         poker_velocity = msg.data[6]
         safety_trigger = True if int(msg.data[7]) == 1 else False
@@ -147,10 +147,14 @@ class ArmDriver(Node):
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
 
         # Turret rotation
-        # set_arm_rotation(self.mcp3, turret_angle)
+        set_arm_rotation(self.mcp3, turret_angle)
 
-        # End-effector pitch and roll
-        # set_hand_rotation(self.mcp1, pitch_angle, roll_angle)
+        # End-effector pitch
+        set_hand_pitch(self.mcp1, pitch_angle)
+
+        # Temp set to non PID as encoder wires need fixing.
+        # End-effector roll
+        set_hand_roll_velocity(self.mcp1, roll_dir)
 
         # Grip movement
         # open_close_hand(self.mcp3, int(grip_velocity))
