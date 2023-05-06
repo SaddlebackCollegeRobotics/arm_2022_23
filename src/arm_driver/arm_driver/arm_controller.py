@@ -190,12 +190,12 @@ def set_hand_roll_velocity(mcp: MotorController, roll_dir: int, angle: int) -> i
 
 # Set arm bicep and forearm velocities using PWM
 def set_arm_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
-    ...
+    raise NotImplementedError
     
 
 # Set turret rotation velocity using PWM
 def set_arm_rotation_velocity(mcp: MotorController, turret_dir: int):
-    ...
+    raise NotImplementedError
 
 
 # Set end-effector grip movement

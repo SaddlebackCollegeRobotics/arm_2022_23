@@ -8,6 +8,7 @@ from std_msgs.msg import Float32MultiArray
 # General imports
 from time import perf_counter
 from .arm_controller import *
+from .small_linear_actuator import Alfreds_Finger
 import signal
 import subprocess
 import os
@@ -81,8 +82,6 @@ class ArmDriver(Node):
         self.signal_timeout = 3 # Max time before soft stop if subscription heartbeat is not detected.
         self.timer = self.create_timer(self.timer_period, self.subscription_heartbeat)
 
-        self.last_poker_velocity = 0
-
 
     # Show menu on program start
     def show_menu(self):
@@ -118,6 +117,9 @@ class ArmDriver(Node):
         
         print("Soft Stop Triggered")
 
+        # Clean up GPIO pins for poker
+        self.poker.cleanup()
+
         for mcp in self.MCP_List:
             if mcp is not None:
                 mcp.rc.ForwardM1(mcp.address, 0)
@@ -144,7 +146,6 @@ class ArmDriver(Node):
             return
 
         print("Arm control instructions received.")
-        print('Angle of roll: ', self.angle_roll)
 
         # Bicep and forearm
         set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
@@ -162,12 +163,7 @@ class ArmDriver(Node):
         # Grip movement
         open_close_hand(self.mcp3, int(grip_velocity))
 
-        # poker_velocity = int(poker_velocity)
-        
-        # # Poker movement - Only set if command changes
-        # if poker_velocity != self.last_poker_velocity:
-        #     self.last_poker_velocity = poker_velocity
-        #     set_poker(self.poker_controller, poker_velocity)
+        # Poker movement
 
         print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
 
@@ -175,6 +171,16 @@ class ArmDriver(Node):
     # Arm control instructions for non IK control
     # Called every time the subscriber receives a message
     def nonIK_subscriber_callback(self, msg):
+        
+        # ******************************************************************************
+        # * UNTIL IMPLEMENTED, REMOVE WHEN DONE
+        # ******************************************************************************
+        assert len(msg.data) != 8, "ADD 2 MORE BUTTON FOR PUSH AND PULL FOR POKER, PLEASE ADD"
+
+        # ******************************************************************************
+        # * UNTIL IMPLEMENTED, REMOVE WHEN DONE
+        # ******************************************************************************
+
 
         self.time_of_last_callback = perf_counter()
 
@@ -203,12 +209,17 @@ class ArmDriver(Node):
         # Grip movement
         open_close_hand(self.mcp3, int(grip_velocity))
 
-        # poker_velocity = int(poker_velocity)
-        
-        # # Poker movement - Only set if command changes
-        # if poker_velocity != self.last_poker_velocity:
-        #     self.last_poker_velocity = poker_velocity
-        #     set_poker(self.poker_controller, poker_velocity)
+
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # ! Change the msg.data[6] & msg.data[8] to be pressable button inputs like 0 & 1 !
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # Poker movement
+        self.set_poker_movement(msg.data[6], msg.data[8])
+
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # ! Change the msg.data[6] & msg.data[8] to be pressable button inputs like 0 & 1 !
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 
     # Get motor controller device paths using serial IDs
@@ -311,8 +322,19 @@ class ArmDriver(Node):
 
     # Initialize additional motor controllers
     def initialize_additional_controllers(self):
-        # self.poker_controller = small_linear_actuator.Alfreds_Finger()
-        ...
+        self.poker = Alfreds_Finger()
+        
+    
+    def set_poker_movement(self, push_button: int, pull_button: int):
+        if abs(push_button):
+            self.poker.push()
+
+        elif abs(pull_button):
+            self.poker.pull()
+
+
+
+
 
 
 def main(args=None):
