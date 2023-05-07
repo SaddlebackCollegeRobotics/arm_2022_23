@@ -1,13 +1,14 @@
-# Author: Jasper Doan - @wluxie
+# Author: Jasper Doan - @wluxie, Cameron Rosenthal - @Supernova1114
 
 import RPi.GPIO as GPIO
-import time
 
 class Alfreds_Finger:
+
     PUSH = 11
-    PULL = 12
+    PULL = 13
     FEED_TIME = 2.5
 
+    LAST_STATE = 0
 
     def __init__(self):
         """
@@ -22,20 +23,37 @@ class Alfreds_Finger:
         """
         Push the finger out. 😳👉
         """
+
+        if self.LAST_STATE == 1:
+            return
+        
+        self.LAST_STATE = 1
         GPIO.output(Alfreds_Finger.PUSH, True)
-        time.sleep(Alfreds_Finger.FEED_TIME)
-        GPIO.output(Alfreds_Finger.PULL, False)
 
 
     def pull(self):
         """
         Pull the finger in. 👈😳
         """
-        GPIO.output(Alfreds_Finger.PULL, True)
-        time.sleep(Alfreds_Finger.FEED_TIME)
-        GPIO.output(Alfreds_Finger.PUSH, False)
 
+        if self.LAST_STATE == -1:
+            return
+        
+        self.LAST_STATE = -1
+        GPIO.output(Alfreds_Finger.PULL, True)
+
+
+    def stop(self):
+        """
+        Stop the finger movement. 😳😳😳
+        """
+
+        self.LAST_STATE = 0
+
+        GPIO.output(Alfreds_Finger.PUSH, False)
+        GPIO.output(Alfreds_Finger.PULL, False)
     
+
     def cleanup(self):
         """
         Clean up GPIO pins.

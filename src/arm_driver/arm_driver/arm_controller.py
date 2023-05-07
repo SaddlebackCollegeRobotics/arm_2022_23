@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from .roboclaw_3 import Roboclaw
-# from .small_linear_actuator import Alfreds_Finger
+from .small_linear_actuator import Alfreds_Finger
 # from collections import namedtuple
 
 
@@ -166,26 +166,14 @@ def set_hand_pitch_velocity(mcp: MotorController, pitch_dir: int):
 
 
 # Set end-effector roll velocity using PWM
-def set_hand_roll_velocity(mcp: MotorController, roll_dir: int, angle: int) -> int:
+def set_hand_roll_velocity(mcp: MotorController, roll_dir: int) -> int:
 
-    if angle >= 90 and roll_dir == 1:
-        mcp.rc.ForwardM1(mcp.address, 0)
-    
-    elif angle <= -90 and roll_dir == -1:
-        mcp.rc.ForwardM1(mcp.address, 0)
-    
-    elif roll_dir == 0:
-        mcp.rc.ForwardM1(mcp.address, 0)
-
-    elif roll_dir == 1 and angle < 90:
+    if roll_dir == 1:
         mcp.rc.BackwardM1(mcp.address, 20)
-        angle += 1
-
-    elif roll_dir == -1 and angle > -90:
+    elif roll_dir == -1:
         mcp.rc.ForwardM1(mcp.address, 20)
-        angle -= 1
-
-    return angle
+    else:
+        mcp.rc.ForwardM1(mcp.address, 0)
 
 
 # Set arm bicep and forearm velocities using PWM
@@ -206,12 +194,13 @@ def open_close_hand(mcp: MotorController, move_velocity: int):
     else:
         mcp.rc.SpeedAccelM1(mcp.address, 20, -move_velocity)
 
-
 # Set poker movement
-# def set_poker(motor_driver: Alfreds_Finger, move_velocity: int):
+def set_poker(motor_driver: Alfreds_Finger, poker_dir: int):
 
-#     if move_velocity == 1:
-#         motor_driver.push()
-#     elif move_velocity == -1:
-#         motor_driver.pull()
+    if poker_dir == 1:
+        motor_driver.push()
+    elif poker_dir == -1:
+        motor_driver.pull()
+    else:
+        motor_driver.stop()
     

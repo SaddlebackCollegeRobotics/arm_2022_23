@@ -8,7 +8,6 @@ from std_msgs.msg import Float32MultiArray
 # General imports
 from time import perf_counter
 from .arm_controller import *
-from .small_linear_actuator import Alfreds_Finger
 import signal
 import subprocess
 import os
@@ -21,7 +20,7 @@ class ArmDriver(Node):
     def quit_program_safely(self):
 
         self.softStop()
-        # self.poker_controller.cleanup()
+        self.poker_controller.cleanup()
 
         print("\nExited Safely")
 
@@ -34,8 +33,6 @@ class ArmDriver(Node):
 
 
     def __init__(self):
-
-        self.angle_roll : float = 0.0
 
         # Signal handler for Ctrl+C
         signal.signal(signal.SIGINT, self.signalHandler)
@@ -51,7 +48,7 @@ class ArmDriver(Node):
         self.initialize_motor_controllers()
         self.initialize_additional_controllers()
 
-        # Give the node a name.
+        # Initialize ROS2 node
         super().__init__('arm_driver')
 
         # Ask to run open or closed loop
@@ -117,13 +114,12 @@ class ArmDriver(Node):
         
         print("Soft Stop Triggered")
 
-        # Clean up GPIO pins for poker
-        self.poker.cleanup()
-
         for mcp in self.MCP_List:
             if mcp is not None:
                 mcp.rc.ForwardM1(mcp.address, 0)
                 mcp.rc.ForwardM2(mcp.address, 0)
+
+        self.poker_controller.stop()
 
 
     # Arm control instructions for IK control
@@ -137,7 +133,7 @@ class ArmDriver(Node):
         turret_angle = msg.data[2]
         pitch_angle, roll_dir = msg.data[3], msg.data[4]
         grip_velocity = msg.data[5]
-        poker_velocity = msg.data[6]
+        poker_dir = msg.data[6]
         safety_trigger = True if int(msg.data[7]) == 1 else False
 
         # Handle safety trigger
@@ -158,68 +154,48 @@ class ArmDriver(Node):
 
         # Temp set to non PID as encoder wires need fixing.
         # End-effector roll
-        self.angle_roll = set_hand_roll_velocity(self.mcp1, int(roll_dir), self.angle_roll)
+        set_hand_roll_velocity(self.mcp1, int(roll_dir))
 
         # Grip movement
         open_close_hand(self.mcp3, int(grip_velocity))
 
         # Poker movement
+        set_poker(self.poker_controller, poker_dir)
 
-        print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+        # Flush stdout
+        sys.stdout.flush()
 
 
     # Arm control instructions for non IK control
     # Called every time the subscriber receives a message
-    def nonIK_subscriber_callback(self, msg):
-        
-        # ******************************************************************************
-        # * UNTIL IMPLEMENTED, REMOVE WHEN DONE
-        # ******************************************************************************
-        assert len(msg.data) != 8, "ADD 2 MORE BUTTON FOR PUSH AND PULL FOR POKER, PLEASE ADD"
+    # def nonIK_subscriber_callback(self, msg):
 
-        # ******************************************************************************
-        # * UNTIL IMPLEMENTED, REMOVE WHEN DONE
-        # ******************************************************************************
+    #     self.time_of_last_callback = perf_counter()
 
+    #     # Unpack ROS2 message
+    #     bicep_dir, forearm_dir = msg.data[0], msg.data[1]
+    #     turret_dir = msg.data[2]
+    #     pitch_dir, roll_dir = msg.data[3], msg.data[4]
+    #     grip_velocity = msg.data[5]
+    #     poker_velocity = msg.data[6]
+    #     safety_trigger = True if int(msg.data[7]) == 1 else False
 
-        self.time_of_last_callback = perf_counter()
+    #     # Handle safety trigger
+    #     if safety_trigger == False:
+    #         self.softStop()
+    #         return
 
-        # Unpack ROS2 message
-        bicep_dir, forearm_dir = msg.data[0], msg.data[1]
-        turret_dir = msg.data[2]
-        pitch_dir, roll_dir = msg.data[3], msg.data[4]
-        grip_velocity = msg.data[5]
-        poker_velocity = msg.data[6]
-        safety_trigger = True if int(msg.data[7]) == 1 else False
+    #     # Bicep and forearm
+    #     set_arm_velocity(self.mcp2, int(bicep_dir), int(forearm_dir))
 
-        # Handle safety trigger
-        if safety_trigger == False:
-            self.softStop()
-            return
+    #     # Turret rotation
+    #     set_arm_rotation_velocity(self.mcp3, int(turret_dir))
 
-        # Bicep and forearm
-        set_arm_velocity(self.mcp2, int(bicep_dir), int(forearm_dir))
+    #     # End-effector pitch and roll
+    #     set_hand_rotation_velocity(self.mcp1, int(pitch_dir), int(roll_dir))
 
-        # Turret rotation
-        set_arm_rotation_velocity(self.mcp3, int(turret_dir))
-
-        # End-effector pitch and roll
-        set_hand_rotation_velocity(self.mcp1, int(pitch_dir), int(roll_dir))
-
-        # Grip movement
-        open_close_hand(self.mcp3, int(grip_velocity))
-
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # ! Change the msg.data[6] & msg.data[8] to be pressable button inputs like 0 & 1 !
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Poker movement
-        self.set_poker_movement(msg.data[6], msg.data[8])
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # ! Change the msg.data[6] & msg.data[8] to be pressable button inputs like 0 & 1 !
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    #     # Grip movement
+    #     open_close_hand(self.mcp3, int(grip_velocity))
 
 
     # Get motor controller device paths using serial IDs
@@ -322,19 +298,9 @@ class ArmDriver(Node):
 
     # Initialize additional motor controllers
     def initialize_additional_controllers(self):
-        self.poker = Alfreds_Finger()
+        self.poker_controller = Alfreds_Finger()
         
     
-    def set_poker_movement(self, push_button: int, pull_button: int):
-        if abs(push_button):
-            self.poker.push()
-
-        elif abs(pull_button):
-            self.poker.pull()
-
-
-
-
 
 
 def main(args=None):
