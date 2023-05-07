@@ -7,7 +7,7 @@ from std_msgs.msg import Float32MultiArray
 
 # General imports
 from time import perf_counter
-from .arm_controller import *
+from .motor_driver import *
 import signal
 import subprocess
 import os
@@ -59,7 +59,7 @@ class ArmDriver(Node):
             # Non IK controls subscription
             self.subscription = self.create_subscription(
                 Float32MultiArray,
-                '/arm/control_instruction_nonIK',
+                '/arm/control_instruction',
                 self.nonIK_subscriber_callback,  # subscriber callback
                 10)
             self.subscription  # prevent unused variable warning

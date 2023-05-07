@@ -11,6 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name, ['arm_driver/find_devpath.bash']),
+        ('share/' + package_name, ['arm_driver/gamepads.config']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,6 +23,7 @@ setup(
     entry_points={
         'console_scripts': [
             'arm_subscriber = arm_driver.arm_subscriber:main',
+            'arm_controller = arm_driver.arm_controller:main',
         ],
     },
 )
