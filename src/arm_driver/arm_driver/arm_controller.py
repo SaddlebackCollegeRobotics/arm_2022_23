@@ -20,7 +20,7 @@ class Arm_Controller(Node):
         self.publisher_ = self.create_publisher(Float32MultiArray, '/arm/control_instruction', 10)
 
         # Create a timer that will call the 'timer_callback' function every timer_period second.
-        timer_period = 0.5  # seconds
+        timer_period = 0.25  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.axis_deadzone = 0.1
@@ -45,8 +45,6 @@ class Arm_Controller(Node):
 
         for i in range(0, 11):
            msg.data.append(1.0) if gamepad_input.getButtonValue(gamepad, i) else msg.data.append(0.0)
-
-        print(msg.data)
 
         self.publisher_.publish(msg)
 

@@ -9,6 +9,7 @@ from .small_linear_actuator import Alfreds_Finger
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
 
 # TODO - Eventually change to be put into MotorController declarations
+# PID constants for each motor
 
 BICEP_SPEED = 850
 BICEP_ACCELERATION = 700
@@ -24,6 +25,18 @@ PITCH_ACCEL = 2500
 
 TURRET_SPEED = 850
 TURRET_ACCEL = 700
+
+# PWM constants for each motor (Used for non PID movement)
+
+MAX_BICEP_PWM = 20
+MAX_FOREARM_PWM = 20
+
+MAX_ROLL_PWM = 20
+MAX_PITCH_PWM = 20
+
+MAX_TURRET_PWM = 20
+MAX_GRIP_PWM = 20
+
 
 # Dataclass wrappers for writing arm data to motors ---------------------------------------------------------
 
@@ -159,40 +172,71 @@ def set_hand_pitch(mcp: MotorController, hand_pitch: float) -> None:
 # Set end-effector pitch velocity using PWM
 def set_hand_pitch_velocity(mcp: MotorController, pitch_dir: int):
     
-    if pitch_dir == 0:
-        mcp.rc.ForwardM2(mcp.address, 0)
+    if pitch_dir == 1:
+        mcp.rc.BackwardM1(mcp.address, MAX_PITCH_PWM)
+    elif pitch_dir == -1:
+        mcp.rc.ForwardM1(mcp.address, MAX_PITCH_PWM)
     else:
-        mcp.rc.SpeedAccelM2(mcp.address, 20, -pitch_dir)
+        mcp.rc.ForwardM1(mcp.address, 0)
 
 
 # Set end-effector roll velocity using PWM
-def set_hand_roll_velocity(mcp: MotorController, roll_dir: int) -> int:
+def set_hand_roll_velocity(mcp: MotorController, roll_dir: int): 
 
     if roll_dir == 1:
-        mcp.rc.BackwardM1(mcp.address, 20)
+        mcp.rc.BackwardM1(mcp.address, MAX_ROLL_PWM)
     elif roll_dir == -1:
-        mcp.rc.ForwardM1(mcp.address, 20)
+        mcp.rc.ForwardM1(mcp.address, MAX_ROLL_PWM)
     else:
         mcp.rc.ForwardM1(mcp.address, 0)
 
 
-# Set arm bicep and forearm velocities using PWM
-def set_arm_velocity(mcp: MotorController, pitch_dir: int, roll_dir: int):
-    raise NotImplementedError
+# Set arm bicep velocity using PWM
+def set_bicep_velocity(mcp: MotorController, bicep_dir: float):
     
+    bicep_speed = bicep_dir * MAX_BICEP_PWM
+
+    if bicep_dir > 0:
+        mcp.rc.BackwardM1(mcp.address, bicep_speed)
+    elif bicep_dir < 0:
+        mcp.rc.ForwardM1(mcp.address, bicep_speed)
+    else:
+        mcp.rc.ForwardM1(mcp.address, 0)
+
+
+# Set arm forearm velocity using PWM
+def set_forearm_velocity(mcp: MotorController, forearm_dir: float):
+    
+    forearm_speed = forearm_dir * MAX_FOREARM_PWM
+
+    if forearm_dir > 0:
+        mcp.rc.BackwardM2(mcp.address, forearm_speed)
+    elif forearm_dir < 0:
+        mcp.rc.ForwardM2(mcp.address, forearm_speed)
+    else:
+        mcp.rc.ForwardM2(mcp.address, 0)
+
 
 # Set turret rotation velocity using PWM
-def set_arm_rotation_velocity(mcp: MotorController, turret_dir: int):
-    raise NotImplementedError
+def set_turret_velocity(mcp: MotorController, turret_dir: float):
+    
+    turret_speed = turret_dir * MAX_TURRET_PWM
+
+    if turret_dir > 0:
+        mcp.rc.BackwardM2(mcp.address, turret_speed)
+    elif turret_dir < 0:
+        mcp.rc.ForwardM2(mcp.address, turret_speed)
+    else:
+        mcp.rc.ForwardM2(mcp.address, 0)
 
 
 # Set end-effector grip movement
-def open_close_hand(mcp: MotorController, move_velocity: int):
+def open_close_hand(mcp: MotorController, move_dir: int):
     
-    if move_velocity == 0:
+    if move_dir == 0:
         mcp.rc.ForwardM1(mcp.address, 0)
     else:
-        mcp.rc.SpeedAccelM1(mcp.address, 20, -move_velocity)
+        mcp.rc.SpeedAccelM1(mcp.address, 20, -move_dir)
 
 # Set poker movement
 def set_poker(motor_driver: Alfreds_Finger, poker_dir: int):
