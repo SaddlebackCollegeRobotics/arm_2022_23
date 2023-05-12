@@ -16,6 +16,8 @@ public class DataPublisher : MonoBehaviour
 
     public float[] dataArray = new float[1]; // Extra data to be published.
 
+    InputManager inputManager;
+
 
     private void Awake()
     {
@@ -31,38 +33,52 @@ public class DataPublisher : MonoBehaviour
         if (ros2Unity.Ok())
         {
             msg = new std_msgs.msg.Float32MultiArray();
-            msg.Data = new float[6];
+            msg.Data = new float[8];
 
-            ros2Node = ros2Unity.CreateNode("ROS2UnityListenerNode");
-            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/Arm_Controls_Sim"); 
+            ros2Node = ros2Unity.CreateNode("ROS2UnityNode");
+            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/arm/control_instruction_IK"); 
         }
-        
+
+        inputManager = InputManager.GetInstance();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Bicep actuator length.
-        msg.Data[0] = (actuatorJointList[0].position - actuatorJointList[1].position).magnitude;
+        if (ros2Unity.Ok())
+        {
+            // Bicep actuator length.
+            msg.Data[0] = (actuatorJointList[0].position - actuatorJointList[1].position).magnitude;
 
-        // Forearm actuator length.
-        msg.Data[1] = (actuatorJointList[2].position - actuatorJointList[3].position).magnitude;
-        
-        // Base rotation.
-        msg.Data[2] = convertAngleRange(jointList[2].localEulerAngles.y);
+            // Forearm actuator length.
+            msg.Data[1] = (actuatorJointList[2].position - actuatorJointList[3].position).magnitude;
+            
+            // Turret rotation.
+            msg.Data[2] = convertAngleRange(jointList[0].localEulerAngles.y);
 
-        // Hand Pitch
-        msg.Data[3] = convertAngleRange(jointList[3].localEulerAngles.z);
+            // Hand pitch
+            msg.Data[3] = convertAngleRange(jointList[1].localEulerAngles.z);
 
-        // Hand Roll
-        msg.Data[4] = convertAngleRange(jointList[4].localEulerAngles.x);
+            int rollDir = inputManager.gripRollLeftAction.IsPressed() ? -1 : inputManager.gripRollRightAction.IsPressed() ? 1 : 0;
 
-        // Hand Fingers Open/Close
-        msg.Data[5] = 0; //dataArray[0];
+            // Hand roll
+            msg.Data[4] = rollDir;
+            //msg.Data[4] = convertAngleRange(jointList[2].localEulerAngles.x);
 
-        //print(msg.Data[0] + " " + msg.Data[1] + " " + msg.Data[2] + " " + msg.Data[3]);
+            int fingerDir = inputManager.gripCloseAction.IsPressed() ? -1 : inputManager.gripOpenAction.IsPressed() ? 1 : 0;
+            int pokerDir = inputManager.pokerInAction.IsPressed() ? -1 : inputManager.pokerOutAction.IsPressed() ? 1 : 0;
+            
+            // Handle fingers Open/Close
+            msg.Data[5] = fingerDir;
+            
+            // Handle poker In/Out
+            msg.Data[6] = pokerDir;
 
-        chatter_pub.Publish(msg);
+            // Handle safety trigger
+            msg.Data[7] = inputManager.safetyAction.IsPressed() ? 1 : 0;
+
+            chatter_pub.Publish(msg);
+        }
     }
 
 
