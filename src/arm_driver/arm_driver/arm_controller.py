@@ -20,7 +20,7 @@ class Arm_Controller(Node):
         self.publisher_ = self.create_publisher(Float32MultiArray, '/arm/control_instruction', 10)
 
         # Create a timer that will call the 'timer_callback' function every timer_period second.
-        timer_period = 0.25  # seconds
+        timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.axis_deadzone = 0.1
@@ -36,15 +36,28 @@ class Arm_Controller(Node):
         msg = Float32MultiArray()
         gamepad = gamepad_input.getGamepad(0)
 
+
         (l2, r2) = gamepad_input.getTriggers(gamepad, self.axis_deadzone)
         (ls_x, ls_y) = gamepad_input.getLeftStick(gamepad, self.axis_deadzone)
         (rs_x, rs_y) = gamepad_input.getRightStick(gamepad, self.axis_deadzone)
         (hat_x, hat_y) = gamepad_input.getHat(gamepad)
 
-        msg.data = [float(l2), float(r2), float(ls_x), float(ls_y), float(rs_x), float(rs_y), float(hat_x), float(hat_y)]
+        bicep_dir = rs_y
+        forearm_dir = ls_y
 
-        for i in range(0, 11):
-           msg.data.append(1.0) if gamepad_input.getButtonValue(gamepad, i) else msg.data.append(0.0)
+        turret_dir = ls_x
+
+        pitch_dir = hat_y
+        roll_dir = hat_x
+
+        grip_dir = 1.0 if gamepad_input.getButtonValue(gamepad, 2) else -1.0 if gamepad_input.getButtonValue(gamepad, 3) else 0
+
+        poker_dir = 1.0 if gamepad_input.getButtonValue(gamepad, 0) else -1.0 if gamepad_input.getButtonValue(gamepad, 1) else 0
+
+        safety_trigger = 1 if l2 > 0.5 or r2 > 0.5 else 0
+
+        # Pack ROS2 message
+        msg.data = [float(bicep_dir), float(forearm_dir), float(-turret_dir), float(-pitch_dir), float(roll_dir), float(-grip_dir), float(poker_dir), float(safety_trigger)]
 
         self.publisher_.publish(msg)
 
