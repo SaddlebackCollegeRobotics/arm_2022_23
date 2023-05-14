@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 from .roboclaw_3 import Roboclaw
 from .small_linear_actuator import Alfreds_Finger
-# from collections import namedtuple
 
 
 BUFFER_OR_INSTANT = 1  # 0 for buffer, 1 for instant write
@@ -43,6 +42,7 @@ MAX_BICEP_SPEED_PID = 600
 MAX_FOREARM_SPEED_PID = 600
 
 MAX_PITCH_SPEED_PID = 600
+MAX_TURRET_SPEED_PID = 300
 
 
 # Dataclass wrappers for writing arm data to motors ---------------------------------------------------------
@@ -264,76 +264,29 @@ def set_arm_speed_PID(mcp: MotorController, bicep_dir: float, forearm_dir: float
     bicep_speed = int(bicep_dir * MAX_BICEP_SPEED_PID)
     forearm_speed = int(forearm_dir * MAX_FOREARM_SPEED_PID)
 
-    # mcp.rc.SpeedM1(mcp.address, bicep_speed)
+    mcp.rc.SpeedM1(mcp.address, bicep_speed)
+
+    # print(bicep_speed, " ", forearm_speed)
     # mcp.rc.SpeedM2(mcp.address, forearm_speed)
 
-    print(bicep_speed, " ", forearm_speed)
+    # print(bicep_speed, " ", forearm_speed)
 
-    mcp.rc.SpeedAccelM1(mcp.address, 700, bicep_speed)
-    mcp.rc.SpeedAccelM2(mcp.address, 700, forearm_speed)
-
-    # mcp.rc.SpeedM1M2(mcp.address, bicep_speed, forearm_speed)
+    # mcp.rc.SpeedAccelM1(mcp.address, 300, bicep_speed)
+    mcp.rc.SpeedAccelM2(mcp.address, 300, forearm_speed)
 
 
 def set_pitch_speed_PID(mcp: MotorController, pitch_dir: int) -> None:
 
     pitch_speed = pitch_dir * MAX_PITCH_SPEED_PID
-    print("Pitch speed: ", pitch_speed)
-    # mcp.rc.SpeedM2(mcp.address, pitch_speed)
+    # mcp.rc.SpeedAccelM2(mcp.address, 300, pitch_speed)
 
-# Change bicep and forearm position using PID
-# def set_arm_position_PID(mcp: MotorController, bicep_actuator_len: float, forearm_actuator_len: float) -> None:
+    enc = mcp.rc.ReadEncM2(mcp.address)[1]
+    newPos = enc + (int(-pitch_dir) * 3000)
 
-#     mcp.rc.speed
-
-#     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-#         BICEP_ACCELERATION, BICEP_SPEED, BICEP_ACCELERATION, encoder_val_m1, 
-#         FOREARM_ACCELERATION, FOREARM_SPEED, FOREARM_ACCELERATION, encoder_val_m2, 
-#         BUFFER_OR_INSTANT 
-#     )
+    mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 300, 300, 300, newPos, 1)
 
 
-# # Set turret rotation angle using PID
-# def set_arm_rotation(mcp: MotorController, base_angle : float) -> None:
+def set_turret_speed_PID(mcp: MotorController, turret_dir: int) -> None:
 
-#     encoder_val = angle_to_enc(mcp.m2, base_angle)
-
-#     mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
-#         TURRET_ACCEL, TURRET_SPEED, TURRET_ACCEL, encoder_val, BUFFER_OR_INSTANT
-#     )
-
-
-# # Set end-effector pitch and roll rotation angle using PID
-# def set_hand_rotation(mcp: MotorController, hand_pitch: float, hand_roll: float) -> None:
-
-#     encoder_val_m1 = angle_to_enc(mcp.m1, hand_roll)
-#     encoder_val_m2 = angle_to_enc(mcp.m2, hand_pitch)
-
-#     mcp.rc.SpeedAccelDeccelPositionM1M2(mcp.address, 
-#         ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
-#         PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
-#         BUFFER_OR_INSTANT 
-#     )
-
-
-# # Set end-effector roll using PID
-# def set_hand_roll(mcp: MotorController, hand_roll: float) -> None:
-
-#     encoder_val_m1 = angle_to_enc(mcp.m1, hand_roll)
-
-#     mcp.rc.SpeedAccelDeccelPositionM1(mcp.address, 
-#         ROLL_ACCEL, ROLL_SPEED, ROLL_ACCEL, encoder_val_m1, 
-#         BUFFER_OR_INSTANT 
-#     )
-
-
-# # Set end-effector pitch using PID
-# def set_hand_pitch(mcp: MotorController, hand_pitch: float) -> None:
-
-#     encoder_val_m2 = angle_to_enc(mcp.m2, hand_pitch)
-
-#     mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
-#         PITCH_ACCEL, PITCH_SPEED, PITCH_ACCEL, encoder_val_m2, 
-#         BUFFER_OR_INSTANT 
-#     )
-
+    turret_speed = turret_dir * MAX_TURRET_SPEED_PID
+    mcp.rc.SpeedAccelM2(mcp.address, 300, turret_speed)

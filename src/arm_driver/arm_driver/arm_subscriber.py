@@ -241,20 +241,14 @@ class ArmDriver(Node):
             self.softStop()
             return
 
-        # print("Arm control instructions received.")
-
         set_arm_speed_PID(self.mcp2, -bicep_actuator_dir, -forearm_actuator_dir)
 
         # Turret rotation
         set_turret_velocity(self.mcp3, turret_rotation_dir)
+        # set_turret_speed_PID(self.mcp3, int(turret_rotation_dir))
 
         # End-effector pitch
         set_pitch_speed_PID(self.mcp1, int(pitch_dir))
-
-        # enc = self.mcp1.rc.ReadEncM2(self.mcp1.address)[1]
-        # newPos = enc + (int(-pitch_dir) * 1000)
-
-        # self.mcp1.rc.SpeedAccelDeccelPositionM2(self.mcp1.address, 300, 300, 300, newPos, 1)
 
         # print(self.mcp1.rc.ReadEncM2(self.mcp1.address))
 
