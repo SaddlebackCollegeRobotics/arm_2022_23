@@ -56,27 +56,37 @@ class ArmDriver(Node):
 
         if self.driver_mode == 1: 
 
-            # Non IK controls subscription
+            # Open loop controls subscription
             self.subscription = self.create_subscription(
                 Float32MultiArray,
                 '/arm/control_instruction',
-                self.nonIK_subscriber_callback,  # subscriber callback
+                self.open_loop_subscriber_callback, # subscriber callback
                 10)
-            self.subscription  # prevent unused variable warning
+            self.subscription # prevent unused variable warning
 
         elif self.driver_mode == 2:
 
             # IK controls subscription
             self.subscription = self.create_subscription(
                 Float32MultiArray,
-                '/arm/control_instruction_IK',
-                self.IK_subscriber_callback,  # subscriber callback
+                '/arm/control_instruction',
+                self.IK_subscriber_callback, # subscriber callback
                 10)
-            self.subscription  # prevent unused variable warning
+            self.subscription # prevent unused variable warning
+
+        elif self.driver_mode == 3:
+
+            # PID speed controls subscription
+            self.subscription = self.create_subscription(
+                Float32MultiArray,
+                '/arm/control_instruction',
+                self.PID_speed_subscriber_callback, # subscriber callback
+                10)
+            self.subscription # prevent unused variable warning
 
         self.time_of_last_callback = perf_counter()
         self.timer_period = 0.5 # Interval for checking heartbeat.
-        self.signal_timeout = 3 # Max time before soft stop if subscription heartbeat is not detected.
+        self.signal_timeout = 2 # Max time before soft stop if subscription heartbeat is not detected.
         self.timer = self.create_timer(self.timer_period, self.subscription_heartbeat)
 
 
@@ -84,12 +94,12 @@ class ArmDriver(Node):
     def show_menu(self):
 
         MIN_MENU = 1
-        MAX_MENU = 2
+        MAX_MENU = 3
 
         while True:
 
             # Choose between IK and Normal subscriber
-            choice = input("Choose an option:\n1. Normal\n2. IK\n:: ")
+            choice = input("Choose an option:\n1. Open loop\n2. IK\n3. PID speed\n:: ")
 
             if choice.isnumeric() == False:
                 continue
@@ -166,17 +176,17 @@ class ArmDriver(Node):
         sys.stdout.flush()
 
 
-    # Arm control instructions for non IK control
+    # Arm control instructions for open loop control
     # Called every time the subscriber receives a message
-    def nonIK_subscriber_callback(self, msg):
+    def open_loop_subscriber_callback(self, msg):
 
         self.time_of_last_callback = perf_counter()
 
         # Unpack ROS2 message
-        bicep_actuator_len, forearm_actuator_len = msg.data[0], msg.data[1]
-        turret_angle = msg.data[2]
-        pitch_angle, roll_dir = msg.data[3], msg.data[4]
-        grip_velocity = msg.data[5]
+        bicep_actuator_dir, forearm_actuator_dir = msg.data[0], msg.data[1]
+        turret_rotation_dir = msg.data[2]
+        pitch_dir, roll_dir = msg.data[3], msg.data[4]
+        grip_dir = msg.data[5]
         poker_dir = msg.data[6]
         safety_trigger = True if int(msg.data[7]) == 1 else False
 
@@ -187,22 +197,74 @@ class ArmDriver(Node):
 
         print("Arm control instructions received.")
 
-        # Bicep and forearm
-        set_arm_position(self.mcp2, bicep_actuator_len, forearm_actuator_len)
-        
+        # Bicep movement
+        set_bicep_velocity(self.mcp2, bicep_actuator_dir)
 
+        # Forearm movement
+        set_forearm_velocity(self.mcp2, forearm_actuator_dir)
+        
         # Turret rotation
-        set_arm_rotation(self.mcp3, turret_angle)
+        set_turret_velocity(self.mcp3, turret_rotation_dir)
 
         # End-effector pitch
-        set_hand_pitch(self.mcp1, pitch_angle)
+        set_hand_pitch_velocity(self.mcp1, int(pitch_dir))
 
-        # Temp set to non PID as encoder wires need fixing.
         # End-effector roll
         set_hand_roll_velocity(self.mcp1, int(roll_dir))
 
         # Grip movement
-        open_close_hand(self.mcp3, int(grip_velocity))
+        open_close_hand(self.mcp3, int(grip_dir))
+
+        # Poker movement
+        # set_poker(self.poker_controller, poker_dir)
+
+        # Flush stdout
+        sys.stdout.flush()
+
+
+    # Arm control instructions for PID control
+    # Called every time the subscriber receives a message
+    def PID_speed_subscriber_callback(self, msg):
+
+        self.time_of_last_callback = perf_counter()
+
+        # Unpack ROS2 message
+        bicep_actuator_dir, forearm_actuator_dir = msg.data[0], msg.data[1]
+        turret_rotation_dir = msg.data[2]
+        pitch_dir, roll_dir = msg.data[3], msg.data[4]
+        grip_dir = msg.data[5]
+        poker_dir = msg.data[6]
+        safety_trigger = True if int(msg.data[7]) == 1 else False
+
+        # Handle safety trigger
+        if safety_trigger == False:
+            self.softStop()
+            return
+
+        set_arm_speed_PID(self.mcp2, -bicep_actuator_dir, -forearm_actuator_dir)
+
+        # Turret rotation
+        set_turret_velocity(self.mcp3, turret_rotation_dir)
+        # set_turret_speed_PID(self.mcp3, int(turret_rotation_dir))
+
+        # End-effector pitch
+        set_pitch_speed_PID(self.mcp1, int(pitch_dir))
+
+        # print(self.mcp1.rc.ReadEncM2(self.mcp1.address))
+
+        # print(int(pitch_dir) * 300)
+        # self.mcp1.rc.SpeedM2(self.mcp1.address, int(pitch_dir) * 300)
+        # self.mcp3.rc.SpeedM2(self.mcp3.address, int(turret_rotation_dir) * 5)
+        # print(int(turret_rotation_dir * 5))
+        # self.mcp3.rc.SpeedAccelM2(self.mcp3.address, 300, int(turret_rotation_dir * 50))
+        
+        # self.mcp2.rc.SpeedAccelDeccelPositionM1M2(self.mcp2.address, 300, int(bicep_actuator_dir * 300), 300, 300, 300, 300, 1)
+
+        # End-effector roll
+        set_hand_roll_velocity(self.mcp1, int(roll_dir))
+
+        # Grip movement
+        open_close_hand(self.mcp3, int(grip_dir))
 
         # Poker movement
         # set_poker(self.poker_controller, poker_dir)

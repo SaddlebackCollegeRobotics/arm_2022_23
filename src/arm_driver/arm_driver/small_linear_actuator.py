@@ -1,6 +1,6 @@
 # Author: Jasper Doan - @wluxie, Cameron Rosenthal - @Supernova1114
 
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 class Alfreds_Finger:
 

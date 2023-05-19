@@ -36,7 +36,7 @@ public class DataPublisher : MonoBehaviour
             msg.Data = new float[8];
 
             ros2Node = ros2Unity.CreateNode("ROS2UnityNode");
-            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/arm/control_instruction_IK"); 
+            chatter_pub = ros2Node.CreatePublisher<std_msgs.msg.Float32MultiArray>("/arm/control_instruction"); 
         }
 
         inputManager = InputManager.GetInstance();
