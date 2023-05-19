@@ -1,3 +1,4 @@
+# Author: Cameron Rosenthal - @Supernova1114
 
 # ROS2 imports
 import rclpy
@@ -34,7 +35,7 @@ class Arm_Controller(Node):
     def timer_callback(self):
         
         msg = Float32MultiArray()
-        gamepad = gamepad_input.getGamepad(0)
+        gamepad = gamepad_input.getGamepad(1)
 
 
         (l2, r2) = gamepad_input.getTriggers(gamepad, self.axis_deadzone)

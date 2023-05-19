@@ -86,7 +86,7 @@ class ArmDriver(Node):
 
         self.time_of_last_callback = perf_counter()
         self.timer_period = 0.5 # Interval for checking heartbeat.
-        self.signal_timeout = 3 # Max time before soft stop if subscription heartbeat is not detected.
+        self.signal_timeout = 2 # Max time before soft stop if subscription heartbeat is not detected.
         self.timer = self.create_timer(self.timer_period, self.subscription_heartbeat)
 
 
