@@ -24,6 +24,7 @@ PITCH_ACCEL = 2500
 
 TURRET_SPEED = 850
 TURRET_ACCEL = 700
+MAX_TURRET_ENCODER_DELTA = 100
 
 # PWM constants for each motor (Used for open loop)
 
@@ -42,7 +43,7 @@ MAX_BICEP_SPEED_PID = 600
 MAX_FOREARM_SPEED_PID = 600
 
 MAX_PITCH_SPEED_PID = 600
-MAX_TURRET_SPEED_PID = 300
+MAX_TURRET_SPEED_PID = 50
 
 
 # Dataclass wrappers for writing arm data to motors ---------------------------------------------------------
@@ -139,6 +140,15 @@ def set_arm_rotation(mcp: MotorController, base_angle : float) -> None:
     mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
         TURRET_ACCEL, TURRET_SPEED, TURRET_ACCEL, encoder_val, BUFFER_OR_INSTANT
     )
+
+
+def change_arm_rotation(mcp: MotorController, analog_dir : float) -> None:
+    
+        encoder_val = mcp.rc.ReadEncM2(mcp.address)[1] + (analog_dir * MAX_TURRET_ENCODER_DELTA)
+    
+        mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 
+            TURRET_ACCEL, TURRET_SPEED, TURRET_ACCEL, encoder_val, BUFFER_OR_INSTANT
+        )
 
 
 # Set end-effector pitch and roll rotation angle using PID
@@ -245,6 +255,7 @@ def open_close_hand(mcp: MotorController, move_dir: int):
     else:
         mcp.rc.SpeedAccelM1(mcp.address, 20, -move_dir)
 
+
 # Set poker movement
 def set_poker(motor_driver: Alfreds_Finger, poker_dir: int):
 
@@ -286,7 +297,21 @@ def set_pitch_speed_PID(mcp: MotorController, pitch_dir: int) -> None:
     mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 300, 300, 300, newPos, 1)
 
 
-def set_turret_speed_PID(mcp: MotorController, turret_dir: int) -> None:
+def set_turret_speed_PID(mcp: MotorController, turret_dir: float) -> None:
 
-    turret_speed = turret_dir * MAX_TURRET_SPEED_PID
+    turret_speed = int(turret_dir * MAX_TURRET_SPEED_PID)
+    print(turret_speed)
     mcp.rc.SpeedAccelM2(mcp.address, 300, turret_speed)
+
+
+
+turret_target_pos = 0
+def change_turret_pos_PID(mcp: MotorController, turret_dir: float, canChange: bool) -> None:
+
+    global turret_target_pos
+
+    if canChange:
+        turret_target_pos += int(-turret_dir * MAX_TURRET_SPEED_PID)
+
+    mcp.rc.SpeedAccelDeccelPositionM2(mcp.address, 300, 300, 300, turret_target_pos, 1)
+
