@@ -89,6 +89,13 @@ class ArmDriver(Node):
         self.signal_timeout = 2 # Max time before soft stop if subscription heartbeat is not detected.
         self.timer = self.create_timer(self.timer_period, self.subscription_heartbeat)
 
+        # TEMP
+        self.canTurrentEncChange = False
+        self.turret_timer = self.create_timer(0.2, self.bruh)
+
+    def bruh(self):
+        self.canTurrentEncChange = True
+
 
     # Show menu on program start
     def show_menu(self):
@@ -244,8 +251,10 @@ class ArmDriver(Node):
         set_arm_speed_PID(self.mcp2, -bicep_actuator_dir, -forearm_actuator_dir)
 
         # Turret rotation
-        set_turret_velocity(self.mcp3, turret_rotation_dir)
-        # set_turret_speed_PID(self.mcp3, int(turret_rotation_dir))
+        # set_turret_velocity(self.mcp3, turret_rotation_dir)
+        # set_turret_speed_PID(self.mcp3, turret_rotation_dir)
+        change_turret_pos_PID(self.mcp3, turret_rotation_dir, self.canTurrentEncChange)
+        self.canTurrentEncChange = False
 
         # End-effector pitch
         set_pitch_speed_PID(self.mcp1, int(pitch_dir))
