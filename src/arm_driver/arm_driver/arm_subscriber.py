@@ -154,8 +154,8 @@ class ArmDriver(Node):
         safety_trigger = True if int(msg.data[7]) == 1 else False
 
         # Handle safety trigger
-        if safety_trigger == False:
-            self.softStop()
+        if safety_trigger:
+            self.quit_program_safely()
             return
 
         print("Arm control instructions received.")
@@ -198,8 +198,8 @@ class ArmDriver(Node):
         safety_trigger = True if int(msg.data[7]) == 1 else False
 
         # Handle safety trigger
-        if safety_trigger == False:
-            self.softStop()
+        if safety_trigger:
+            self.quit_program_safely()
             return
 
         print("Arm control instructions received.")
@@ -244,8 +244,8 @@ class ArmDriver(Node):
         safety_trigger = True if int(msg.data[7]) == 1 else False
 
         # Handle safety trigger
-        if safety_trigger == False:
-            self.softStop()
+        if safety_trigger:
+            self.quit_program_safely()
             return
 
         set_arm_speed_PID(self.mcp2, -bicep_actuator_dir, -forearm_actuator_dir)
@@ -258,16 +258,6 @@ class ArmDriver(Node):
 
         # End-effector pitch
         set_pitch_speed_PID(self.mcp1, int(pitch_dir))
-
-        # print(self.mcp1.rc.ReadEncM2(self.mcp1.address))
-
-        # print(int(pitch_dir) * 300)
-        # self.mcp1.rc.SpeedM2(self.mcp1.address, int(pitch_dir) * 300)
-        # self.mcp3.rc.SpeedM2(self.mcp3.address, int(turret_rotation_dir) * 5)
-        # print(int(turret_rotation_dir * 5))
-        # self.mcp3.rc.SpeedAccelM2(self.mcp3.address, 300, int(turret_rotation_dir * 50))
-        
-        # self.mcp2.rc.SpeedAccelDeccelPositionM1M2(self.mcp2.address, 300, int(bicep_actuator_dir * 300), 300, 300, 300, 300, 1)
 
         # End-effector roll
         set_hand_roll_velocity(self.mcp1, int(roll_dir))

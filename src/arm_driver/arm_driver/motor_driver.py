@@ -253,7 +253,7 @@ def open_close_hand(mcp: MotorController, move_dir: int):
     if move_dir == 0:
         mcp.rc.ForwardM1(mcp.address, 0)
     else:
-        mcp.rc.SpeedAccelM1(mcp.address, 20, -move_dir)
+        mcp.rc.SpeedAccelM1(mcp.address, 20, move_dir)
 
 
 # Set poker movement

@@ -38,7 +38,7 @@ class Arm_Controller(Node):
         gamepad = gamepad_input.getGamepad(1)
 
 
-        (l2, r2) = gamepad_input.getTriggers(gamepad, self.axis_deadzone)
+        # (l2, r2) = gamepad_input.getTriggers(gamepad, self.axis_deadzone)
         (ls_x, ls_y) = gamepad_input.getLeftStick(gamepad, self.axis_deadzone)
         (rs_x, rs_y) = gamepad_input.getRightStick(gamepad, self.axis_deadzone)
         (hat_x, hat_y) = gamepad_input.getHat(gamepad)
@@ -51,11 +51,14 @@ class Arm_Controller(Node):
         pitch_dir = hat_y
         roll_dir = hat_x
 
+        # X close, O open
         grip_dir = 1.0 if gamepad_input.getButtonValue(gamepad, 2) else -1.0 if gamepad_input.getButtonValue(gamepad, 3) else 0
 
+        # Triangle out, Square in
         poker_dir = 1.0 if gamepad_input.getButtonValue(gamepad, 0) else -1.0 if gamepad_input.getButtonValue(gamepad, 1) else 0
 
-        safety_trigger = 1 if l2 > 0.5 or r2 > 0.5 else 0
+        # Menu button
+        safety_trigger = 1 if gamepad_input.getButtonValue(gamepad, 5) else 0
 
         # Pack ROS2 message
         msg.data = [float(bicep_dir), float(forearm_dir), float(-turret_dir), float(-pitch_dir), float(roll_dir), float(-grip_dir), float(poker_dir), float(safety_trigger)]
