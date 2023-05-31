@@ -247,18 +247,16 @@ def onHatMotion(event, callbackList):
     hat = gamepadDict[event.instance_id][0].get_hat(layout[17])
 
     # Handle X axis
-    match hat[0]:
-        case 1: # East
-            tryCallback(callbackList[3])
-        case -1: # West
-            tryCallback(callbackList[2])
+    if hat[0] == 1: # East
+        tryCallback(callbackList[3])
+    elif hat[0] == -1: # West
+        tryCallback(callbackList[2])
 
     # Handle Y axis
-    match hat[1]:
-        case 1: # North
-            tryCallback(callbackList[0])
-        case -1: # South
-            tryCallback(callbackList[1])
+    if hat[1] == 1: # North
+        tryCallback(callbackList[0])
+    elif hat[1] == -1: # South
+        tryCallback(callbackList[1])
 
     if (hat[0] == 0 and hat[1] == 0): # Hat is centered
         tryCallback(callbackList[4])
@@ -273,39 +271,37 @@ def run_event_loop(onButtonDownEvents = None, onButtonUpEvents = None, hatEvents
             
             # Handle events
             for event in pygame.event.get():
+                
+                # Handle quit event
+                if event.type == pygame.QUIT: 
+                    quit()
 
-                match event.type:
-                    
-                    # Handle quit event
-                    case pygame.QUIT: 
-                        quit()
+                # Get Button DOWN gamepad events
+                elif event.type == pygame.JOYBUTTONDOWN:
+                    if (onButtonDownEvents != None):
+                        onButtonEvent(event, onButtonDownEvents)
 
-                    # Get Button DOWN gamepad events
-                    case pygame.JOYBUTTONDOWN:
-                        if (onButtonDownEvents != None):
-                            onButtonEvent(event, onButtonDownEvents)
+                # Get Button UP gamepad events
+                elif event.type == pygame.JOYBUTTONUP:
+                    if (onButtonUpEvents != None):
+                        onButtonEvent(event, onButtonUpEvents)
 
-                    # Get Button UP gamepad events
-                    case pygame.JOYBUTTONUP:
-                        if (onButtonUpEvents != None):
-                            onButtonEvent(event, onButtonUpEvents)
+                # Handle gamepad hat events
+                elif event.type == pygame.JOYHATMOTION:
+                    if (hatEvents != None):
+                        onHatMotion(event, hatEvents)
+                
+                # Handle new gamepad connections
+                elif event.type == pygame.JOYDEVICEADDED: 
+                    onGamepadConnected(event)
+                    if (connectionEvents != None):
+                        tryCallback(connectionEvents[0])
 
-                    # Handle gamepad hat events
-                    case pygame.JOYHATMOTION:
-                        if (hatEvents != None):
-                            onHatMotion(event, hatEvents)
-                    
-                    # Handle new gamepad connections
-                    case pygame.JOYDEVICEADDED: 
-                        onGamepadConnected(event)
-                        if (connectionEvents != None):
-                            tryCallback(connectionEvents[0])
-
-                    # Handle gamepad disconnections
-                    case pygame.JOYDEVICEREMOVED: 
-                        onGamepadRemoved(event)
-                        if (connectionEvents != None):
-                            tryCallback(connectionEvents[1])
+                # Handle gamepad disconnections
+                elif event.type == pygame.JOYDEVICEREMOVED: 
+                    onGamepadRemoved(event)
+                    if (connectionEvents != None):
+                        tryCallback(connectionEvents[1])
 
 
     global thread
