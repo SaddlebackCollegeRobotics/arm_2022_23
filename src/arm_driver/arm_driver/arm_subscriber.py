@@ -20,7 +20,7 @@ class ArmDriver(Node):
     def quit_program_safely(self):
 
         self.softStop()
-        # self.poker_controller.cleanup()
+        self.poker_controller.cleanup()
 
         print("\nExited Safely")
 
@@ -136,7 +136,7 @@ class ArmDriver(Node):
                 mcp.rc.ForwardM1(mcp.address, 0)
                 mcp.rc.ForwardM2(mcp.address, 0)
 
-        # self.poker_controller.stop()
+        self.poker_controller.stop()
 
 
     # Arm control instructions for IK control
@@ -177,7 +177,7 @@ class ArmDriver(Node):
         open_close_hand(self.mcp3, int(grip_velocity))
 
         # Poker movement
-        # set_poker(self.poker_controller, poker_dir)
+        set_poker(self.poker_controller, poker_dir)
 
         # Flush stdout
         sys.stdout.flush()
@@ -223,7 +223,7 @@ class ArmDriver(Node):
         open_close_hand(self.mcp3, int(grip_dir))
 
         # Poker movement
-        # set_poker(self.poker_controller, poker_dir)
+        set_poker(self.poker_controller, poker_dir)
 
         # Flush stdout
         sys.stdout.flush()
@@ -266,7 +266,7 @@ class ArmDriver(Node):
         open_close_hand(self.mcp3, int(grip_dir))
 
         # Poker movement
-        # set_poker(self.poker_controller, poker_dir)
+        set_poker(self.poker_controller, poker_dir)
 
         # Flush stdout
         sys.stdout.flush()
@@ -372,8 +372,7 @@ class ArmDriver(Node):
 
     # Initialize additional motor controllers
     def initialize_additional_controllers(self):
-        # self.poker_controller = Alfreds_Finger()
-        ...
+        self.poker_controller = Alfreds_Finger()
         
     
 
