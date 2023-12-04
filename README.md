@@ -9,5 +9,5 @@
 * Open loop mode is just for educational purposes, regarding the idea of a closed loop system.
 
 ### Real arm and simulated arm
-<img src="repo_images/real-rover.jpg" width="48%" align=left> 
-<img src="repo_images/robot-arm-sim.gif" width="50%" align=right>
+<img src="repo_images/real-rover.jpg"> 
+<img src="repo_images/robot-arm-sim.gif">
