@@ -8,6 +8,8 @@
 * Simulation consists of a digital twin of the arm. This being an inverse kinematic model developed in Unity Engine. Given this control mode, the real robotic arm will attempt to move to the position of the arm in the simulation.
 * Open loop mode is just for educational purposes, regarding the idea of a closed loop system.
 
-### Real arm and simulated arm
-<img src="repo_images/real-rover.jpg"> 
+### Real Rover and Arm
+<img src="repo_images/real-rover.jpg" width="50%"> 
+
+### Simulated Arm
 <img src="repo_images/robot-arm-sim.gif">
